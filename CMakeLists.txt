@@ -50,8 +50,8 @@ generate_dynamic_reconfigure_options(cfg/SMCDriver.py)
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES smc smc_driver
-#  CATKIN_DEPENDS dynamic_reconfigure nodelet pluginlib roscpp std_msgs std_srvs
-   DEPENDS usb-1.0
+   CATKIN_DEPENDS dynamic_reconfigure nodelet pluginlib roscpp std_msgs std_srvs
+   DEPENDS libusb-1.0
 )
 
 ###########
