@@ -49,7 +49,7 @@ generate_dynamic_reconfigure_options(cfg/SMCDriver.py)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-   LIBRARIES smc
+   LIBRARIES smc smc_driver
 #  CATKIN_DEPENDS dynamic_reconfigure nodelet pluginlib roscpp std_msgs std_srvs
    DEPENDS usb-1.0
 )
