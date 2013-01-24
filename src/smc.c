@@ -463,7 +463,7 @@ int smc_get_settings( const int smcd, struct SmcSettings *set, const unsigned in
 
 int smc_set_settings( const int smcd, struct SmcSettings *set, const unsigned int to )
 {
-	return libusb_control_transfer( smc_list[smcd]->dev, 0xC0, SetSettings, 0, 0, (unsigned char *)set, sizeof( struct SmcSettings ), to );
+	return libusb_control_transfer( smc_list[smcd]->dev, 0x40, SetSettings, 0, 0, (unsigned char *)set, sizeof( struct SmcSettings ), to );
 }
 
 int smc_stat( const int smcd )
