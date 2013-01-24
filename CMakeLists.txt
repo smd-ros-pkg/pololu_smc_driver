@@ -49,9 +49,9 @@ generate_dynamic_reconfigure_options(cfg/SMCDriver.py)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-   LIBRARIES smc smc_driver
+   LIBRARIES smc_driver
    CATKIN_DEPENDS dynamic_reconfigure nodelet pluginlib roscpp std_msgs std_srvs
-   DEPENDS libusb-1.0
+#   DEPENDS libusb-1.0
 )
 
 ###########
@@ -82,11 +82,13 @@ add_executable(smc_driver_node src/smc_driver_node.cpp)
 # add_dependencies(pololu_smc_driver_node ${PROJECT_NAME})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(smc_driver_node
+target_link_libraries(smc_driver
   smc
+  ${LIBUSB1_LIBRARIES}
+)
+target_link_libraries(smc_driver_node
   smc_driver
   ${catkin_LIBRARIES}
-  ${LIBUSB1_LIBRARIES}
 )
 
 #############
