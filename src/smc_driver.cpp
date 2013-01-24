@@ -80,7 +80,11 @@ namespace pololu_smc_driver
 			spd *= -1;
 		}
 		spd *= 3200;
-		return smc_set_speed( smcd, (int)(spd + .5), dir, 2000 );
+		
+		int ret = smc_set_speed( smcd, (int)(spd + .5), dir, 2000 );
+		if( ret >= 0 )
+			diag_up_freq.tick( );
+		return ret;
 	}
 
 	void SMCDriver::SpeedCB( const std_msgs::Float32Ptr &msg )
