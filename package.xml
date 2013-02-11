@@ -23,14 +23,14 @@
   <build_depend>roscpp</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
-  <build_depend>libusb-1.0</build_depend>
+  <build_depend>libusb-1.0-dev</build_depend>
   <run_depend>std_srvs</run_depend>
   <run_depend>nodelet</run_depend>
   <run_depend>pluginlib</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
-  <run_depend>libusb-1.0</run_depend>
+  <run_depend>libusb-1.0-dev</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
