@@ -79,7 +79,9 @@ add_library(smc_driver_nodelet
 add_executable(smc_driver_node src/smc_driver_node.cpp)
 
 ## Add dependencies to the executable
-# add_dependencies(pololu_smc_driver_node ${PROJECT_NAME})
+add_dependencies(smc_driver ${PROJECT_NAME}_gencfg)
+add_dependencies(smc_driver_node smc_driver)
+add_dependencies(smc_driver_nodelet smc_driver)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(smc_driver
