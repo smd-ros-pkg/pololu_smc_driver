@@ -67,7 +67,7 @@ int main( int argc, char *argv[] )
 	pololu_smc_driver::SMCDriver smc( nh_priv, sn );
 
 	if( !smc.SMCOpen( ) )
-		ROS_ERROR( "Failed to open SMC device" );
+		ROS_ERROR( "Failed to open SMC device (will keep trying)" );
 
 	ros::spin( );
 
