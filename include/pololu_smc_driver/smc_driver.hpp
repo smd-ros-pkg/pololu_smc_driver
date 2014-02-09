@@ -224,13 +224,14 @@ namespace pololu_smc_driver
 		 *
 		 * \author Scott K Logan
 		 *
-		 * Queries the device for settings and updates the dynamic reconfigure
-		 * values appropriately. This is called automatically every time the device
-		 * is connected.
+		 * Queries the device for settings and merges them with any settings
+		 * explicitly set in the parameter server. Also updates the dynamic
+		 * reconfigure server values appropriately. This is called
+		 * automatically every time the device is connected.
 		 *
 		 * \returns True if values were successfully updated.
 		 */
-		bool refresh_settings( );
+		bool merge_settings( );
 		/*!
 		 * \brief Converts an error code to a comma separated string.
 		 *
@@ -276,7 +277,7 @@ namespace pololu_smc_driver
 		/*!
 		 * \brief Dynamic reconfigure server
 		 */
-		dynamic_reconfigure::Server<pololu_smc_driver::SMCDriverConfig> dyn_re;
+		dynamic_reconfigure::Server<pololu_smc_driver::SMCDriverConfig> *dyn_re;
 		/*!
 		 * \brief Dynamic reconfigure callback handle
 		 */

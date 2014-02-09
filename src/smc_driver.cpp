@@ -47,7 +47,7 @@ namespace pololu_smc_driver
 {
 	SMCDriver::SMCDriver( const ros::NodeHandle &_nh_priv, const std::string _serial ) :
 		nh_priv( _nh_priv ),
-		dyn_re( dyn_re_mutex, nh_priv ),
+		dyn_re( NULL ),
 		dyn_re_cb_type( boost::bind( &SMCDriver::DynReCB, this, _1, _2) ),
 		min_update_rate( 10.0 ),
 		max_update_rate( 100.0 ),
@@ -56,7 +56,7 @@ namespace pololu_smc_driver
 		serial( _serial )
 	{
 		smc_init( );
-		diag.setHardwareID( "Pololu SMC (unknown serial)" );
+		diag.setHardwareIDf( "Pololu SMC %s", serial.length( ) ? serial.c_str( ) : "(unknown serial)" );
 		diag.add( "Pololu SMC Status", this, &SMCDriver::DiagCB );
 		diag.add( diag_up_freq );
 		diag_timer = nh_priv.createWallTimer( ros::WallDuration( 1 ), &SMCDriver::TimerCB, this );
@@ -66,6 +66,7 @@ namespace pololu_smc_driver
 	{
 		SMCClose( );
 		smc_exit( );
+		delete dyn_re;
 	}
 
 	bool SMCDriver::set_speed( float spd )
@@ -151,16 +152,21 @@ namespace pololu_smc_driver
 
 		char mySerial[256];
 		smc_get_serial( smcd, mySerial );
+		serial = mySerial;
 		diag.setHardwareIDf( "Pololu SMC %s", mySerial );
 
-		if( !refresh_settings( ) )
+		if( !merge_settings( ) )
 		{
 			smc_close( smcd );
 			smcd = -1;
 			return false;
 		}
 
-		dyn_re.setCallback( dyn_re_cb_type );
+		// If this is initial startup, make sure that the DR server is running. We
+		// needed to wait for the initial device settings load before doing this.
+		if( !dyn_re )
+			dyn_re = new dynamic_reconfigure::Server<pololu_smc_driver::SMCDriverConfig>( dyn_re_mutex, nh_priv );
+		dyn_re->setCallback( dyn_re_cb_type );
 		speed_sub = nh_priv.subscribe( "speed", 1, &SMCDriver::SpeedCB, this );
 		safe_start_srv = nh_priv.advertiseService( "safe_start", &SMCDriver::SafeStartCB, this );
 		estop_srv = nh_priv.advertiseService( "estop", &SMCDriver::EStopCB, this );
@@ -173,7 +179,8 @@ namespace pololu_smc_driver
 		estop_srv.shutdown( );
 		safe_start_srv.shutdown( );
 		speed_sub.shutdown( );
-		dyn_re.clearCallback( );
+		if( dyn_re )
+			dyn_re->clearCallback( );
 		smc_close( smcd );
 		smcd = -1;
 	}
@@ -430,18 +437,21 @@ namespace pololu_smc_driver
 		return ( smc_stop( smcd, 2000 ) >= 0 );
 	}
 
-	bool SMCDriver::refresh_settings( )
+	bool SMCDriver::merge_settings( )
 	{
 		if( !SMCStat( ) )
 			return false;
 
 		struct SmcSettings set;
 
+		boost::recursive_mutex::scoped_lock lock( dyn_re_mutex );
+
 		if( smc_get_settings( smcd, &set, 5000 ) < 0 )
 			return false;
 
 		struct pololu_smc_driver::SMCDriverConfig cfg;
 
+		// Start with the device config
 		cfg.neverSuspend = set.neverSuspend;
 		cfg.uartResponseDelay = set.uartResponseDelay;
 		cfg.useFixedBaudRate = set.useFixedBaudRate;
@@ -471,8 +481,17 @@ namespace pololu_smc_driver
 		cfg.lowVinShutoffMv = set.lowVinShutoffMv;
 		cfg.serialMode = set.serialMode;
 
-		boost::recursive_mutex::scoped_lock lock( dyn_re_mutex );
-		dyn_re.updateConfig( cfg );
+		// Merge in the parameter server's values. These changes will be pushed to the
+		// device when the callback is set later
+		cfg.__fromServer__( nh_priv );
+		cfg.__clamp__( );
+
+		// If DR server is running, update it internally. Otherwise, make sure
+		// parameter server is right when it starts up
+		if( dyn_re )
+			dyn_re->updateConfig( cfg );
+		else
+			cfg.__toServer__( nh_priv );
 
 		return true;
 	}
