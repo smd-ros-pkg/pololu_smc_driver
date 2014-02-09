@@ -33,4 +33,8 @@
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>driver_base</run_depend>
   <run_depend>libusb-1.0-dev</run_depend>
+
+  <export>
+    <nodelet plugin="${prefix}/nodelet_plugins.xml" />
+  </export>
 </package>

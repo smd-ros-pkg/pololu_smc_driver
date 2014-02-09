@@ -40,7 +40,7 @@
 #include <ros/ros.h>
 #include <pluginlib/class_list_macros.h>
 
-PLUGINLIB_DECLARE_CLASS( pololu_smc_driver, SMCDriverNodelet, pololu_smc_driver::SMCDriverNodelet, nodelet::Nodelet )
+PLUGINLIB_EXPORT_CLASS(pololu_smc_driver::SMCDriverNodelet, nodelet::Nodelet)
 
 namespace pololu_smc_driver
 {
@@ -64,8 +64,6 @@ namespace pololu_smc_driver
 
 		if( !smc->SMCOpen( ) )
 			NODELET_ERROR( "SMCDriverNodelet: Failed to open SMC device" );
-
-		NODELET_INFO( "SMCDriverNodelet: Ready" );
 	}
 }
 

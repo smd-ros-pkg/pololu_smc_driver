@@ -1,0 +1,11 @@
+<library path="lib/libsmc_driver_nodelet">
+
+  <class name="pololu_smc_driver/smc_driver_nodelet"
+	 type="pololu_smc_driver::SMCDriverNodelet"
+	 base_class_type="nodelet::Nodelet">
+    <description>
+      A Nodelet to interface to the Pololu SMC family of motor controllers.
+    </description>
+  </class>
+
+</library>
