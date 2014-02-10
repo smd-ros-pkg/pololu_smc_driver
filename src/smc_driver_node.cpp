@@ -59,12 +59,13 @@ int main( int argc, char *argv[] )
 {
 	ros::init( argc, argv, "smc_driver_node" );
 
+	ros::NodeHandle nh;
 	ros::NodeHandle nh_priv( "~" );
 
 	std::string sn;
 	nh_priv.param( "smc_serial", sn, (const std::string)"" );
 
-	pololu_smc_driver::SMCDriver smc( nh_priv, sn );
+	pololu_smc_driver::SMCDriver smc( nh, nh_priv, sn );
 
 	if( !smc.SMCOpen( ) )
 		ROS_ERROR( "Failed to open SMC device (will keep trying)" );

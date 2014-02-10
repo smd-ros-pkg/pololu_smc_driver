@@ -44,7 +44,7 @@
 #include "pololu_smc_driver/SMCLimitsConfig.h"
 
 #include <ros/ros.h>
-#include <std_msgs/Float32.h>
+#include <trajectory_msgs/JointTrajectory.h>
 #include <std_srvs/Empty.h>
 #include <dynamic_reconfigure/server.h>
 #include <diagnostic_updater/diagnostic_updater.h>
@@ -79,7 +79,9 @@ namespace pololu_smc_driver
 		 * This constructor initializes the standalone C driver and the various
 		 * components of the ROS interface from that driver.
 		 *
-		 * \param _nh_priv Private node handle to use for all ROS communication
+		 * \param _nh Node handle to use for all ROS topic communication
+		 *   within for this device.
+		 * \param _nh_priv Private node handle to use for all ROS parameters
 		 *   within for this device. There should never be two drivers sharing the
 		 *   same private node handle. If one is not provided, it will be
 		 *   automatically created.
@@ -88,7 +90,8 @@ namespace pololu_smc_driver
 		 *   Please note that if there are multiple devices connected, this may not
 		 *   be the same device every time!
 		 */
-		SMCDriver( const ros::NodeHandle &_nh_priv = ros::NodeHandle( "~" ),
+		SMCDriver( const ros::NodeHandle &_nh = ros::NodeHandle( ),
+			const ros::NodeHandle &_nh_priv = ros::NodeHandle( "~" ),
 			const std::string _serial = "" );
 		/*!
 		 * \brief Destructor.
@@ -141,11 +144,11 @@ namespace pololu_smc_driver
 		 * If the device is currently in a disconnected state, this function will
 		 * first attempt to connect to the device.
 		 *
-		 * \param spd Target speed for the device, between -1 and 1.
+		 * \param spd Target speed for the device, between -3200 and 3200.
 		 *
 		 * \returns True on successful speed change.
 		 */
-		bool set_speed( float spd );
+		bool set_speed( short int spd );
 	private:
 		/*!
 		 * \brief ROS message callback for setting the speed of the motor.
@@ -154,10 +157,10 @@ namespace pololu_smc_driver
 		 *
 		 * Calls the native SMCDriver::set_speed function
 		 *
-		 * \param msg Float value indicating the desired speed. Should be between -1
-		 *   and 1.
+		 * \param msg JointTrajectory message indicating the desired speed of the
+		 *   motor. Should be between -3200 and 3200.
 		 */
-		void SpeedCB( const std_msgs::Float32Ptr &msg );
+		void JointTrajCB( const trajectory_msgs::JointTrajectoryPtr &msg );
 		/*!
 		 * \brief Dynamic Reconfigure Change Callback.
 		 *
@@ -333,6 +336,10 @@ namespace pololu_smc_driver
 		boost::recursive_mutex dyn_re_mutex;
 
 		/*!
+		 * \brief NodeHanlde used to interface with ROS
+		 */
+		ros::NodeHandle nh;
+		/*!
 		 * \brief Private NodeHanlde used to interface with ROS
 		 */
 		ros::NodeHandle nh_priv;
@@ -363,7 +370,7 @@ namespace pololu_smc_driver
 		/*!
 		 * \brief Subscription to speed control data
 		 */
-		ros::Subscriber speed_sub;
+		ros::Subscriber joint_traj_sub;
 		/*!
 		 * \brief Safe start service provider
 		 */
@@ -459,6 +466,11 @@ namespace pololu_smc_driver
 		 *   a blank string for the first available device.
 		 */
 		std::string serial;
+		/*!
+		 * \brief Joint name to set speed based on (within received JointTrajectory
+		 *   message
+		 */
+		std::string joint_name;
 	};
 }
 

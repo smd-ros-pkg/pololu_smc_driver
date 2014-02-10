@@ -56,11 +56,12 @@ namespace pololu_smc_driver
 
 	void SMCDriverNodelet::onInit( )
 	{
+		ros::NodeHandle nh = getNodeHandle( );
 		ros::NodeHandle nh_priv = getPrivateNodeHandle( );
 		std::string sn;
 		nh_priv.param( "smc_serial", sn, (const std::string)"" );
 
-		smc = new SMCDriver( nh_priv, sn );
+		smc = new SMCDriver( nh, nh_priv, sn );
 
 		if( !smc->SMCOpen( ) )
 			NODELET_ERROR( "SMCDriverNodelet: Failed to open SMC device" );

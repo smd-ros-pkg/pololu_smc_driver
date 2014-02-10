@@ -45,7 +45,9 @@
 
 namespace pololu_smc_driver
 {
-	SMCDriver::SMCDriver( const ros::NodeHandle &_nh_priv, const std::string _serial ) :
+	SMCDriver::SMCDriver( const ros::NodeHandle &_nh, const ros::NodeHandle &_nh_priv,
+		const std::string _serial ) :
+		nh( _nh ),
 		nh_priv( _nh_priv ),
 		rc1_nh_priv( nh_priv, "rc1" ),
 		rc2_nh_priv( nh_priv, "rc2" ),
@@ -71,13 +73,15 @@ namespace pololu_smc_driver
 		max_update_rate( 100.0 ),
 		diag_up_freq( diagnostic_updater::FrequencyStatusParam( &min_update_rate, &max_update_rate, 0.1, 5 ) ),
 		smcd( -1 ),
-		serial( _serial )
+		serial( _serial ),
+		joint_name( "motor" )
 	{
 		smc_init( );
 		diag.setHardwareIDf( "Pololu SMC %s", serial.length( ) ? serial.c_str( ) : "(unknown serial)" );
 		diag.add( "Pololu SMC Status", this, &SMCDriver::DiagCB );
 		diag.add( diag_up_freq );
 		diag_timer = nh_priv.createWallTimer( ros::WallDuration( 1 ), &SMCDriver::TimerCB, this );
+		nh_priv.param( "joint_name", joint_name, joint_name );
 	}
 
 	SMCDriver::~SMCDriver( )
@@ -87,7 +91,7 @@ namespace pololu_smc_driver
 		delete dyn_re;
 	}
 
-	bool SMCDriver::set_speed( float spd )
+	bool SMCDriver::set_speed( short int spd )
 	{
 		if( !SMCStat( ) )
 			return false;
@@ -103,15 +107,21 @@ namespace pololu_smc_driver
 		if( spd > 3200 )
 			spd = 3200;
 		
-		int ret = smc_set_speed( smcd, (int)(spd + .5), dir, 2000 );
+		int ret = smc_set_speed( smcd, spd, dir, 2000 );
 		if( ret >= 0 )
 			diag_up_freq.tick( );
 		return ret;
 	}
 
-	void SMCDriver::SpeedCB( const std_msgs::Float32Ptr &msg )
+	void SMCDriver::JointTrajCB( const trajectory_msgs::JointTrajectoryPtr &msg )
 	{
-		set_speed( msg->data );
+		int idx = -1;
+		for( int i = 0; i < msg->joint_names.size( ); i++ )
+			if( msg->joint_names[i] == joint_name )
+				idx = i;
+		if( !msg->points.size( ) || idx < 0 || idx >= msg->points[0].velocities.size( ) )
+			return;
+		set_speed( msg->points[0].velocities[idx] + 0.5 );
 	}
 
 	void SMCDriver::DynReCB( pololu_smc_driver::SMCDriverConfig &cfg, const uint32_t lvl )
@@ -347,8 +357,8 @@ namespace pololu_smc_driver
 		fwlimits_dyn_re->setCallback( fwlimits_dyn_re_cb_type );
 		revlimits_dyn_re->setCallback( revlimits_dyn_re_cb_type );
 
-		if( !speed_sub )
-			speed_sub = nh_priv.subscribe( "speed", 1, &SMCDriver::SpeedCB, this );
+		if( !joint_traj_sub )
+			joint_traj_sub = nh.subscribe( "joint_trajectory", 1, &SMCDriver::JointTrajCB, this );
 		if( !safe_start_srv )
 			safe_start_srv = nh_priv.advertiseService( "safe_start", &SMCDriver::SafeStartCB, this );
 		if( !estop_srv )
@@ -363,8 +373,8 @@ namespace pololu_smc_driver
 			estop_srv.shutdown( );
 		if( safe_start_srv )
 			safe_start_srv.shutdown( );
-		if( speed_sub )
-			speed_sub.shutdown( );
+		if( joint_traj_sub )
+			joint_traj_sub.shutdown( );
 
 		if( dyn_re )
 			dyn_re->clearCallback( );
