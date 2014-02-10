@@ -446,9 +446,35 @@ namespace pololu_smc_driver
 				stat.summary( diagnostic_msgs::DiagnosticStatus::ERROR, "SMC is reporting errors" );
 			else if( vars.errorOccurred )
 				stat.summary( diagnostic_msgs::DiagnosticStatus::WARN, "SMC has recorded errors" );
+			else if( vars.limitStatus )
+				stat.summary( diagnostic_msgs::DiagnosticStatus::WARN, "SMC is limiting speed" );
 			stat.add( "errorStatus", ErrorToStr( vars.errorStatus ) );
 			stat.add( "errorOccurred", ErrorToStr( vars.errorOccurred ) );
 			stat.add( "limitStatus", LimitToStr( vars.limitStatus ) );
+			// RC1
+			{
+				stat.add( "rc1/unlimitedRawValue", vars.rc1.unlimitedRawValue );
+				stat.add( "rc1/rawValue", vars.rc1.rawValue );
+				stat.add( "rc1/scaledValue", vars.rc1.scaledValue );
+			}
+			// RC2
+			{
+				stat.add( "rc2/unlimitedRawValue", vars.rc2.unlimitedRawValue );
+				stat.add( "rc2/rawValue", vars.rc2.rawValue );
+				stat.add( "rc2/scaledValue", vars.rc2.scaledValue );
+			}
+			// Analog1
+			{
+				stat.add( "analog1/unlimitedRawValue", vars.analog1.unlimitedRawValue );
+				stat.add( "analog1/rawValue", vars.analog1.rawValue );
+				stat.add( "analog1/scaledValue", vars.analog1.scaledValue );
+			}
+			// Analog2
+			{
+				stat.add( "analog2/unlimitedRawValue", vars.analog2.unlimitedRawValue );
+				stat.add( "analog2/rawValue", vars.analog2.rawValue );
+				stat.add( "analog2/scaledValue", vars.analog2.scaledValue );
+			}
 			stat.add( "targetSpeed", vars.targetSpeed / 32.0 );
 			stat.add( "speed", vars.speed / 32.0 );
 			stat.add( "brakeAmount", ( vars.brakeAmount == 255 ) ? 0.0 : vars.brakeAmount / .320 );
