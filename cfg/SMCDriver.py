@@ -51,8 +51,8 @@ gen.add( "neverSuspend", bool_t, SensorLevels.RECONFIGURE_RUNNING, "Never enter 
 gen.add( "uartResponseDelay", bool_t, SensorLevels.RECONFIGURE_RUNNING, "Insert delay before serial responses.", False )
 gen.add( "useFixedBaudRate", bool_t, SensorLevels.RECONFIGURE_RUNNING, "Don't auto-detect baud rate.", False )
 gen.add( "disableSafeStart", bool_t, SensorLevels.RECONFIGURE_RUNNING, "Don't require safe-start to resume motor operation.", False )
-gen.add( "fixedBaudRateRegister", int_t, SensorLevels.RECONFIGURE_RUNNING, "Used when useFixedBaudRate is true.", 0, 0, 65535 )
-gen.add( "speedUpdatePeriod", int_t, SensorLevels.RECONFIGURE_RUNNING, "Time between internal updates, units of 1ms.", 22, 1, 65535 )
+gen.add( "fixedBaudRateRegister", int_t, SensorLevels.RECONFIGURE_RUNNING, "Used when useFixedBaudRate is true.", 7500, 0, 65535 )
+gen.add( "speedUpdatePeriod", int_t, SensorLevels.RECONFIGURE_RUNNING, "Time between internal updates, units of 1ms.", 1, 1, 65535 )
 gen.add( "commandTimeout", int_t, SensorLevels.RECONFIGURE_RUNNING, "Time before a command timeout occurs, units of 10ms, 0 to disable.", 0, 0, 65535 )
 gen.add( "serialDeviceNumber", int_t, SensorLevels.RECONFIGURE_RUNNING, "Serial address for use with the Pololu protocol.", 0, 0, 254 )
 ## \brief Enumerator for possible values in crcMode
@@ -61,8 +61,8 @@ crcModeEnum = gen.enum([gen.const( "Disabled", int_t, 0, "Disable CRC Checks." )
 			gen.const( "All", int_t, 3, "Required for RX and used for TX." )],
 			"Enum to set crcMode")
 gen.add( "crcMode", int_t, SensorLevels.RECONFIGURE_RUNNING, "CRC mode for serial I/O.", 0, 0, 3, edit_method=crcModeEnum )
-gen.add( "overTempMin", int_t, SensorLevels.RECONFIGURE_RUNNING, "Minimum level for over-temp, units of .1C.", 0, 0, 65535 )
-gen.add( "overTempMax", int_t, SensorLevels.RECONFIGURE_RUNNING, "Maximum level for over-temp, units of .1C.", 0, 0, 65535 )
+gen.add( "overTempMin", int_t, SensorLevels.RECONFIGURE_RUNNING, "Minimum level for over-temp, units of .1C.", 700, 0, 65535 )
+gen.add( "overTempMax", int_t, SensorLevels.RECONFIGURE_RUNNING, "Maximum level for over-temp, units of .1C.", 800, 0, 65535 )
 ## \brief Enumerator for possible values in inputMode
 inputModeEnum = gen.enum([gen.const( "SerialUSB", int_t, 0, "Serial and/or USB." ),
 			gen.const( "Analog", int_t, 1, "A1/A2 Voltage." ),

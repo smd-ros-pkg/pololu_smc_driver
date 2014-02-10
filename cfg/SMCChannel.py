@@ -67,11 +67,11 @@ pinModeEnum = gen.enum([gen.const( "Floating", int_t, 0, "No pull-up or pull-dow
 			gen.const( "PullDown", int_t, 2, "Weak pull-down resistor (to 0 V) enabled." )],
 			"Enum to set pinMode")
 gen.add( "pinMode", int_t, SensorLevels.RECONFIGURE_RUNNING, "Determines if the analog input is floating, pulled up, or pulled down.", 0, 0, 2, edit_method=pinModeEnum )
-gen.add( "errorMin", int_t, SensorLevels.RECONFIGURE_RUNNING, "rawValues greater than this generate an error.", 500 * 4, 0, 65535 )
-gen.add( "errorMax", int_t, SensorLevels.RECONFIGURE_RUNNING, "rawValues less than this generate an error.", 2500 * 4, 0, 65535 )
-gen.add( "inputMin", int_t, SensorLevels.RECONFIGURE_RUNNING, "rawValues greater than or equal to this are inverted.", 1000 * 4, 0, 65535 )
-gen.add( "inputMax", int_t, SensorLevels.RECONFIGURE_RUNNING, "rawValues less than or equal to this are inverted.", 2000 * 4, 0, 65535 )
-gen.add( "inputNeutralMin", int_t, SensorLevels.RECONFIGURE_RUNNING, "rawValues between inputNeutralMin and inputNeutralMax get mapped to a speed of zero.", 1475 * 4, 0, 65535 )
-gen.add( "inputNeutralMax", int_t, SensorLevels.RECONFIGURE_RUNNING, "rawValues between inputNeutralMin and inputNeutralMax get mapped to a speed of zero.", 1525 * 4, 0, 65535 )
+gen.add( "errorMin", int_t, SensorLevels.RECONFIGURE_RUNNING, "rawValues greater than this generate an error.", 0, 0, 65535 )
+gen.add( "errorMax", int_t, SensorLevels.RECONFIGURE_RUNNING, "rawValues less than this generate an error.", 4095, 0, 65535 )
+gen.add( "inputMin", int_t, SensorLevels.RECONFIGURE_RUNNING, "rawValues greater than or equal to this are inverted.", 40, 0, 65535 )
+gen.add( "inputMax", int_t, SensorLevels.RECONFIGURE_RUNNING, "rawValues less than or equal to this are inverted.", 4055, 0, 65535 )
+gen.add( "inputNeutralMin", int_t, SensorLevels.RECONFIGURE_RUNNING, "rawValues between inputNeutralMin and inputNeutralMax get mapped to a speed of zero.", 2080, 0, 65535 )
+gen.add( "inputNeutralMax", int_t, SensorLevels.RECONFIGURE_RUNNING, "rawValues between inputNeutralMin and inputNeutralMax get mapped to a speed of zero.", 2015, 0, 65535 )
 
 exit( gen.generate( PACKAGE, "smc_driver", "SMCChannel" ) )
