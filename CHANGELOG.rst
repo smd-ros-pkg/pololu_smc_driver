@@ -2,8 +2,8 @@
 Changelog for package pololu_smc_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.5 (2014-02-09)
+------------------
 * Add rosdoc.yaml
 * Fix doxygen in DynRe config files
 * Switched to using JointTrajectory instead of Float32 for speed
