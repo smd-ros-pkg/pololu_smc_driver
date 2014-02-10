@@ -2,8 +2,8 @@
 Changelog for package pololu_smc_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.6 (2014-02-10)
+------------------
 * Actual topics for channel data (up to 1000Hz polling)
 * Remove channel variables from diagnostics
 * Better defaults for config
