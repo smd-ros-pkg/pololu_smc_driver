@@ -464,7 +464,7 @@ namespace pololu_smc_driver
 			stat.add( "errorStatus", ErrorToStr( vars.errorStatus ) );
 			stat.add( "errorOccurred", ErrorToStr( vars.errorOccurred ) );
 			stat.add( "limitStatus", LimitToStr( vars.limitStatus ) );
-			// RC1
+			/*// RC1
 			{
 				stat.add( "rc1/unlimitedRawValue", vars.rc1.unlimitedRawValue );
 				stat.add( "rc1/rawValue", vars.rc1.rawValue );
@@ -487,7 +487,7 @@ namespace pololu_smc_driver
 				stat.add( "analog2/unlimitedRawValue", vars.analog2.unlimitedRawValue );
 				stat.add( "analog2/rawValue", vars.analog2.rawValue );
 				stat.add( "analog2/scaledValue", vars.analog2.scaledValue );
-			}
+			}*/
 			stat.add( "targetSpeed", vars.targetSpeed / 32.0 );
 			stat.add( "speed", vars.speed / 32.0 );
 			stat.add( "brakeAmount", ( vars.brakeAmount == 255 ) ? 0.0 : vars.brakeAmount / .320 );
