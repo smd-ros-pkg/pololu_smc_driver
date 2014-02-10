@@ -60,7 +60,7 @@ alternateUseEnum = gen.enum([gen.const( "None", int_t, 0, "This channel is not u
 			gen.const( "LimitReverse", int_t, 2, "If this channel is active (Scaled Value >= 1600), then the motor is not allowed to move in reverse." ),
 			gen.const( "KillSwitch", int_t, 3, "If this channel is active (Scale Value >= 1600), then the motor is not allowed to move." )],
 			"Enum to set alternateUse")
-gen.add( "alternateUse", int_t, SensorLevels.RECONFIGURE_RUNNING, "Used to allow a channel be a limit switch.", 0, 0, 3 )
+gen.add( "alternateUse", int_t, SensorLevels.RECONFIGURE_RUNNING, "Used to allow a channel be a limit switch.", 0, 0, 3, edit_method=alternateUseEnum )
 ## \brief Enumerator for possible values in pinMode
 pinModeEnum = gen.enum([gen.const( "Floating", int_t, 0, "No pull-up or pull-down resistors enabled." ),
 			gen.const( "PullUp", int_t, 1, "Weak pull-up resistor (to 3.3 V) enabled." ),
