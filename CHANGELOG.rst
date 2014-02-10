@@ -2,6 +2,14 @@
 Changelog for package pololu_smc_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Actual topics for channel data (up to 1000Hz polling)
+* Remove channel variables from diagnostics
+* Better defaults for config
+* Fix an enum in channel DynRe
+* Contributors: Scott K Logan
+
 0.1.5 (2014-02-09)
 ------------------
 * Add rosdoc.yaml
