@@ -255,7 +255,26 @@ namespace pololu_smc_driver
 		 *
 		 * \param e Timer event (not used)
 		 */
-		void TimerCB( const ros::WallTimerEvent &e );
+		void DiagTimerCB( const ros::WallTimerEvent &e );
+		/*!
+		 * \brief Callback for the Channel Information Timer
+		 *
+		 * \author Scott K Logan
+		 *
+		 * This timer is used to publish information from the channels on the SMC.
+		 *
+		 * \param e Timer event (not used)
+		 */
+		void ChannelTimerCB( const ros::WallTimerEvent &e );
+		/*!
+		 * \brief Callback for the Channel Publishers
+		 *
+		 * \author Scott K Logan
+		 *
+		 * This function should be called whenever there is a change in the number
+		 * of subscribers to any of the channel publishers.
+		 */
+		void ChannelPubCB( );
 		/*!
 		 * \brief Diagnostic update callback
 		 *
@@ -368,6 +387,58 @@ namespace pololu_smc_driver
 		 */
 		ros::NodeHandle revlimits_nh_priv;
 		/*!
+		 * \brief Raw input reading from Channel RC1
+		 */
+		ros::Publisher rc1_raw_pub;
+		/*!
+		 * \brief Raw input reading after limit configuration from Channel RC1
+		 */
+		ros::Publisher rc1_raw_limited_pub;
+		/*!
+		 * \brief Scaled input reading (see SMC
+		 *   pololu_smc_driver::SMCChannelConfig::scalingDegree) from Channel RC1
+		 */
+		ros::Publisher rc1_scaled_pub;
+		/*!
+		 * \brief Raw input reading from Channel RC2
+		 */
+		ros::Publisher rc2_raw_pub;
+		/*!
+		 * \brief Raw input reading after limit configuration from Channel RC2
+		 */
+		ros::Publisher rc2_raw_limited_pub;
+		/*!
+		 * \brief Scaled input reading (see SMC
+		 *   pololu_smc_driver::SMCChannelConfig::scalingDegree) from Channel RC2
+		 */
+		ros::Publisher rc2_scaled_pub;
+		/*!
+		 * \brief Raw input reading from Channel Analog1
+		 */
+		ros::Publisher analog1_raw_pub;
+		/*!
+		 * \brief Raw input reading after limit configuration from Channel Analog1
+		 */
+		ros::Publisher analog1_raw_limited_pub;
+		/*!
+		 * \brief Scaled input reading (see SMC
+		 *   pololu_smc_driver::SMCChannelConfig::scalingDegree) from Channel Analog1
+		 */
+		ros::Publisher analog1_scaled_pub;
+		/*!
+		 * \brief Raw input reading from Channel Analog2
+		 */
+		ros::Publisher analog2_raw_pub;
+		/*!
+		 * \brief Raw input reading after limit configuration from Channel Analog2
+		 */
+		ros::Publisher analog2_raw_limited_pub;
+		/*!
+		 * \brief Scaled input reading (see SMC
+		 *   pololu_smc_driver::SMCChannelConfig::scalingDegree) from Channel Analog2
+		 */
+		ros::Publisher analog2_scaled_pub;
+		/*!
 		 * \brief Subscription to speed control data
 		 */
 		ros::Subscriber joint_traj_sub;
@@ -440,6 +511,10 @@ namespace pololu_smc_driver
 		 */
 		ros::WallTimer diag_timer;
 		/*!
+		 * \brief Timer for publishing channel information
+		 */
+		ros::WallTimer channel_timer;
+		/*!
 		 * \brief Diagnostic updater
 		 */
 		diagnostic_updater::Updater diag;
@@ -455,6 +530,10 @@ namespace pololu_smc_driver
 		 * \brief Diagnostic rate for speed update
 		 */
 		diagnostic_updater::FrequencyStatus diag_up_freq;
+		/*!
+		 * \brief Callback for changes to the channel publisher subscribers
+		 */
+		const ros::SubscriberStatusCallback channel_pub_cb;
 
 		/*!
 		 * \brief SMC device handle to use when interfacing with the standalone
@@ -471,6 +550,10 @@ namespace pololu_smc_driver
 		 *   message
 		 */
 		std::string joint_name;
+		/*!
+		 * \brief Rate at which channel information is queried and published
+		 */
+		double channelQueryRate;
 	};
 }
 

@@ -40,6 +40,9 @@
 #include "pololu_smc_driver/smc_driver.hpp"
 
 #include <ros/ros.h>
+#include <std_msgs/Int16.h>
+#include <std_msgs/Float32.h>
+#include <std_msgs/Float64.h>
 #include <dynamic_reconfigure/server.h>
 #include <driver_base/SensorLevels.h>
 
@@ -72,16 +75,20 @@ namespace pololu_smc_driver
 		min_update_rate( 10.0 ),
 		max_update_rate( 100.0 ),
 		diag_up_freq( diagnostic_updater::FrequencyStatusParam( &min_update_rate, &max_update_rate, 0.1, 5 ) ),
+		channel_pub_cb( boost::bind( &SMCDriver::ChannelPubCB, this ) ),
 		smcd( -1 ),
 		serial( _serial ),
-		joint_name( "motor" )
+		joint_name( "motor" ),
+		channelQueryRate( 1.0 )
 	{
 		smc_init( );
+		nh_priv.param( "joint_name", joint_name, joint_name );
+		nh_priv.param( "channelQueryRate", channelQueryRate, channelQueryRate );
 		diag.setHardwareIDf( "Pololu SMC %s", serial.length( ) ? serial.c_str( ) : "(unknown serial)" );
 		diag.add( "Pololu SMC Status", this, &SMCDriver::DiagCB );
 		diag.add( diag_up_freq );
-		diag_timer = nh_priv.createWallTimer( ros::WallDuration( 1 ), &SMCDriver::TimerCB, this );
-		nh_priv.param( "joint_name", joint_name, joint_name );
+		diag_timer = nh_priv.createWallTimer( ros::WallDuration( 1 ), &SMCDriver::DiagTimerCB, this );
+		channel_timer = nh_priv.createWallTimer( ros::WallDuration( 1.0 / channelQueryRate ), &SMCDriver::ChannelTimerCB, this, false, false );
 	}
 
 	SMCDriver::~SMCDriver( )
@@ -134,6 +141,11 @@ namespace pololu_smc_driver
 		if( smc_get_settings( smcd, &set, 5000 ) < 0 )
 			return;
 
+		if( cfg.channelQueryRate != channelQueryRate )
+		{
+			channelQueryRate = cfg.channelQueryRate;
+			channel_timer.setPeriod( ros::WallDuration( 1.0 / channelQueryRate ) );
+		}
 		set.neverSuspend = cfg.neverSuspend;
 		set.uartResponseDelay = cfg.uartResponseDelay;
 		set.useFixedBaudRate = cfg.useFixedBaudRate;
@@ -364,6 +376,34 @@ namespace pololu_smc_driver
 		if( !estop_srv )
 			estop_srv = nh_priv.advertiseService( "estop", &SMCDriver::EStopCB, this );
 
+		if( !rc1_raw_pub )
+			rc1_raw_pub = rc1_nh_priv.advertise<std_msgs::Float64>( "raw", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+		if( !rc1_raw_limited_pub )
+			rc1_raw_limited_pub = rc1_nh_priv.advertise<std_msgs::Float64>( "raw_limited", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+		if( !rc1_scaled_pub )
+			rc1_scaled_pub = rc1_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+		if( !rc2_raw_pub )
+			rc2_raw_pub = rc2_nh_priv.advertise<std_msgs::Float64>( "raw", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+		if( !rc2_raw_limited_pub )
+			rc2_raw_limited_pub = rc2_nh_priv.advertise<std_msgs::Float64>( "raw_limited", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+		if( !rc2_scaled_pub )
+			rc2_scaled_pub = rc2_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+		if( !analog1_raw_pub )
+			analog1_raw_pub = analog1_nh_priv.advertise<std_msgs::Float32>( "raw", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+		if( !analog1_raw_limited_pub )
+			analog1_raw_limited_pub = analog1_nh_priv.advertise<std_msgs::Float32>( "raw_limited", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+		if( !analog1_scaled_pub )
+			analog1_scaled_pub = analog1_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+		if( !analog2_raw_pub )
+			analog2_raw_pub = analog2_nh_priv.advertise<std_msgs::Float32>( "raw", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+		if( !analog2_raw_limited_pub )
+			analog2_raw_limited_pub = analog2_nh_priv.advertise<std_msgs::Float32>( "raw_limited", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+		if( !analog2_scaled_pub )
+			analog2_scaled_pub = analog2_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+
+		// Check for initial subscribers
+		ChannelPubCB( );
+
 		return true;
 	}
 
@@ -375,6 +415,25 @@ namespace pololu_smc_driver
 			safe_start_srv.shutdown( );
 		if( joint_traj_sub )
 			joint_traj_sub.shutdown( );
+
+		if( rc1_raw_pub )
+			rc1_raw_pub.shutdown( );
+		if( rc1_raw_limited_pub )
+			rc1_raw_limited_pub.shutdown( );
+		if( rc1_scaled_pub )
+			rc1_scaled_pub.shutdown( );
+		if( rc2_raw_pub )
+			rc2_raw_pub.shutdown( );
+		if( rc2_raw_limited_pub )
+			rc2_raw_limited_pub.shutdown( );
+		if( rc2_scaled_pub )
+			rc2_scaled_pub.shutdown( );
+		if( analog1_raw_pub )
+			analog1_raw_pub.shutdown( );
+		if( analog1_raw_limited_pub )
+			analog1_raw_limited_pub.shutdown( );
+		if( analog1_scaled_pub )
+			analog1_scaled_pub.shutdown( );
 
 		if( dyn_re )
 			dyn_re->clearCallback( );
@@ -405,7 +464,7 @@ namespace pololu_smc_driver
 		return true;
 	}
 
-	void SMCDriver::TimerCB( const ros::WallTimerEvent &e )
+	void SMCDriver::DiagTimerCB( const ros::WallTimerEvent &e )
 	{
 		diag.update( );
 
@@ -413,6 +472,110 @@ namespace pololu_smc_driver
 		// - restart the timer (otherwise the diagnostic_updater limits us and we hit 1/2 of the time)
 		// - update the timer if the diagnostic period changed
 		diag_timer.setPeriod( ros::WallDuration( diag.getPeriod( ) ) );
+	}
+
+	void SMCDriver::ChannelTimerCB( const ros::WallTimerEvent &e )
+	{
+		struct SmcVariables vars;
+
+		if( smc_get_variables( smcd, &vars, 5000 ) < 0 )
+			return;
+
+		// RC1
+		if( rc1_raw_pub && vars.rc1.unlimitedRawValue != 0xFFFF )
+		{
+			std_msgs::Float64Ptr msg( new std_msgs::Float64 );
+			msg->data = vars.rc1.unlimitedRawValue / 4000000.0;
+			rc1_raw_pub.publish( msg );
+		}
+		if( rc1_raw_limited_pub && vars.rc1.rawValue != 0xFFFF )
+		{
+			std_msgs::Float64Ptr msg( new std_msgs::Float64 );
+			msg->data = vars.rc1.rawValue / 4000000.0;
+			rc1_raw_limited_pub.publish( msg );
+		}
+		if( rc1_scaled_pub )
+		{
+			std_msgs::Int16Ptr msg( new std_msgs::Int16 );
+			msg->data = vars.rc1.scaledValue;
+			rc1_scaled_pub.publish( msg );
+		}
+		// RC2
+		if( rc2_raw_pub && vars.rc2.unlimitedRawValue != 0xFFFF )
+		{
+			std_msgs::Float64Ptr msg( new std_msgs::Float64 );
+			msg->data = vars.rc2.unlimitedRawValue / 4000000.0;
+			rc2_raw_pub.publish( msg );
+		}
+		if( rc2_raw_limited_pub && vars.rc2.rawValue != 0xFFFF )
+		{
+			std_msgs::Float64Ptr msg( new std_msgs::Float64 );
+			msg->data = vars.rc2.rawValue / 4000000.0;
+			rc2_raw_limited_pub.publish( msg );
+		}
+		if( rc2_scaled_pub )
+		{
+			std_msgs::Int16Ptr msg( new std_msgs::Int16 );
+			msg->data = vars.rc2.scaledValue;
+			rc2_scaled_pub.publish( msg );
+		}
+		// Analog1
+		if( analog1_raw_pub && vars.analog1.unlimitedRawValue != 0xFFFF )
+		{
+			std_msgs::Float32Ptr msg( new std_msgs::Float32 );
+			msg->data = vars.analog1.unlimitedRawValue * 0.000805861;
+			analog1_raw_pub.publish( msg );
+		}
+		if( analog1_raw_limited_pub && vars.analog1.rawValue != 0xFFFF )
+		{
+			std_msgs::Float32Ptr msg( new std_msgs::Float32 );
+			msg->data = vars.analog1.rawValue * 0.000805861;
+			analog1_raw_limited_pub.publish( msg );
+		}
+		if( analog1_scaled_pub )
+		{
+			std_msgs::Int16Ptr msg( new std_msgs::Int16 );
+			msg->data = vars.analog1.scaledValue;
+			analog1_scaled_pub.publish( msg );
+		}
+		// Analog2
+		if( analog2_raw_pub && vars.analog2.unlimitedRawValue != 0xFFFF )
+		{
+			std_msgs::Float32Ptr msg( new std_msgs::Float32 );
+			msg->data = vars.analog2.unlimitedRawValue / ( .33 * 4095 );
+			analog2_raw_pub.publish( msg );
+		}
+		if( analog2_raw_limited_pub && vars.analog2.rawValue != 0xFFFF )
+		{
+			std_msgs::Float32Ptr msg( new std_msgs::Float32 );
+			msg->data = vars.analog2.rawValue / ( .33 * 4095 );
+			analog2_raw_limited_pub.publish( msg );
+		}
+		if( analog2_scaled_pub )
+		{
+			std_msgs::Int16Ptr msg( new std_msgs::Int16 );
+			msg->data = vars.analog2.scaledValue;
+			analog2_scaled_pub.publish( msg );
+		}
+	}
+
+	void SMCDriver::ChannelPubCB( )
+	{
+		if( rc1_raw_pub.getNumSubscribers( ) > 0 ||
+			rc1_raw_limited_pub.getNumSubscribers( ) > 0 ||
+			rc1_scaled_pub.getNumSubscribers( ) > 0 ||
+			rc2_raw_pub.getNumSubscribers( ) > 0 ||
+			rc2_raw_limited_pub.getNumSubscribers( ) > 0 ||
+			rc2_scaled_pub.getNumSubscribers( ) > 0 ||
+			analog1_raw_pub.getNumSubscribers( ) > 0 ||
+			analog1_raw_limited_pub.getNumSubscribers( ) > 0 ||
+			analog1_scaled_pub.getNumSubscribers( ) > 0 ||
+			analog2_raw_pub.getNumSubscribers( ) > 0 ||
+			analog2_raw_limited_pub.getNumSubscribers( ) > 0 ||
+			analog2_scaled_pub.getNumSubscribers( ) > 0 )
+			channel_timer.start( );
+		else
+			channel_timer.stop( );
 	}
 
 	void SMCDriver::DiagCB( diagnostic_updater::DiagnosticStatusWrapper &stat )
@@ -464,30 +627,6 @@ namespace pololu_smc_driver
 			stat.add( "errorStatus", ErrorToStr( vars.errorStatus ) );
 			stat.add( "errorOccurred", ErrorToStr( vars.errorOccurred ) );
 			stat.add( "limitStatus", LimitToStr( vars.limitStatus ) );
-			/*// RC1
-			{
-				stat.add( "rc1/unlimitedRawValue", vars.rc1.unlimitedRawValue );
-				stat.add( "rc1/rawValue", vars.rc1.rawValue );
-				stat.add( "rc1/scaledValue", vars.rc1.scaledValue );
-			}
-			// RC2
-			{
-				stat.add( "rc2/unlimitedRawValue", vars.rc2.unlimitedRawValue );
-				stat.add( "rc2/rawValue", vars.rc2.rawValue );
-				stat.add( "rc2/scaledValue", vars.rc2.scaledValue );
-			}
-			// Analog1
-			{
-				stat.add( "analog1/unlimitedRawValue", vars.analog1.unlimitedRawValue );
-				stat.add( "analog1/rawValue", vars.analog1.rawValue );
-				stat.add( "analog1/scaledValue", vars.analog1.scaledValue );
-			}
-			// Analog2
-			{
-				stat.add( "analog2/unlimitedRawValue", vars.analog2.unlimitedRawValue );
-				stat.add( "analog2/rawValue", vars.analog2.rawValue );
-				stat.add( "analog2/scaledValue", vars.analog2.scaledValue );
-			}*/
 			stat.add( "targetSpeed", vars.targetSpeed / 32.0 );
 			stat.add( "speed", vars.speed / 32.0 );
 			stat.add( "brakeAmount", ( vars.brakeAmount == 255 ) ? 0.0 : vars.brakeAmount / .320 );

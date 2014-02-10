@@ -4,7 +4,7 @@ project(pololu_smc_driver)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure nodelet pluginlib roscpp trajectory_msgs std_srvs)
+find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure nodelet pluginlib roscpp std_msgs trajectory_msgs std_srvs)
 
 ## System dependencies are found with CMake's conventions
 find_package(PkgConfig REQUIRED)
@@ -54,7 +54,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES smc_driver
-   CATKIN_DEPENDS dynamic_reconfigure nodelet pluginlib roscpp trajectory_msgs std_srvs
+   CATKIN_DEPENDS dynamic_reconfigure nodelet pluginlib roscpp std_msgs trajectory_msgs std_srvs
 #   DEPENDS libusb-1.0
 )
 
