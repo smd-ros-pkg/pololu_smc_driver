@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 ##
-# \file SMCDriver.cfg
+# \file SMCDriver.py
 #
 # \brief Dynamic Reconfigure definitions
 # \author Scott K Logan

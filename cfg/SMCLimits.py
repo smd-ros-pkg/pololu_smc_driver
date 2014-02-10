@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 ##
-# \file SMCLimits.cfg
+# \file SMCLimits.py
 #
 # \brief Dynamic Reconfigure definitions for Channels
 # \author Scott K Logan
