@@ -36,5 +36,6 @@
 
   <export>
     <nodelet plugin="${prefix}/nodelet_plugins.xml" />
+    <rosdoc config="${prefix}/rosdoc.yaml" />
   </export>
 </package>
