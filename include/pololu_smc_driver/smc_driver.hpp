@@ -40,6 +40,8 @@
 
 #include "pololu_smc_driver/smc.h"
 #include "pololu_smc_driver/SMCDriverConfig.h"
+#include "pololu_smc_driver/SMCChannelConfig.h"
+#include "pololu_smc_driver/SMCLimitsConfig.h"
 
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
@@ -169,6 +171,78 @@ namespace pololu_smc_driver
 		 */
 		void DynReCB( pololu_smc_driver::SMCDriverConfig &cfg, const uint32_t lvl );
 		/*!
+		 * \brief Dynamic Reconfigure Change Callback for Channel RC1.
+		 *
+		 * \author Scott K Logan
+		 *
+		 * When dynamic reconfigure values are changed for channel RC1, this callback
+		 * is called to interface the new values with the device.
+		 *
+		 * \param cfg New dynamic reconfigure values to be sent to the device
+		 * \param lvl Level of change in the values (indicates if reset is necessary)
+		 */
+		void RC1DynReCB( pololu_smc_driver::SMCChannelConfig &cfg, const uint32_t lvl );
+		/*!
+		 * \brief Dynamic Reconfigure Change Callback for Channel RC2.
+		 *
+		 * \author Scott K Logan
+		 *
+		 * When dynamic reconfigure values are changed for channel RC2, this callback
+		 * is called to interface the new values with the device.
+		 *
+		 * \param cfg New dynamic reconfigure values to be sent to the device
+		 * \param lvl Level of change in the values (indicates if reset is necessary)
+		 */
+		void RC2DynReCB( pololu_smc_driver::SMCChannelConfig &cfg, const uint32_t lvl );
+		/*!
+		 * \brief Dynamic Reconfigure Change Callback for Channel Analog 1.
+		 *
+		 * \author Scott K Logan
+		 *
+		 * When dynamic reconfigure values are changed for channel Analog 1, this
+		 * callback is called to interface the new values with the device.
+		 *
+		 * \param cfg New dynamic reconfigure values to be sent to the device
+		 * \param lvl Level of change in the values (indicates if reset is necessary)
+		 */
+		void Analog1DynReCB( pololu_smc_driver::SMCChannelConfig &cfg, const uint32_t lvl );
+		/*!
+		 * \brief Dynamic Reconfigure Change Callback for Channel Analog 2.
+		 *
+		 * \author Scott K Logan
+		 *
+		 * When dynamic reconfigure values are changed for channel Analog 2, this
+		 * callback is called to interface the new values with the device.
+		 *
+		 * \param cfg New dynamic reconfigure values to be sent to the device
+		 * \param lvl Level of change in the values (indicates if reset is necessary)
+		 */
+		void Analog2DynReCB( pololu_smc_driver::SMCChannelConfig &cfg, const uint32_t lvl );
+		/*!
+		 * \brief Dynamic Reconfigure Change Callback for Forward Limits
+		 *
+		 * \author Scott K Logan
+		 *
+		 * When dynamic reconfigure values are changed for forward limits, this
+		 * callback is called to interface the new values with the device.
+		 *
+		 * \param cfg New dynamic reconfigure values to be sent to the device
+		 * \param lvl Level of change in the values (indicates if reset is necessary)
+		 */
+		void FWLimitsDynReCB( pololu_smc_driver::SMCLimitsConfig &cfg, const uint32_t lvl );
+		/*!
+		 * \brief Dynamic Reconfigure Change Callback for Reverse Limits
+		 *
+		 * \author Scott K Logan
+		 *
+		 * When dynamic reconfigure values are changed for reverse limits, this
+		 * callback is called to interface the new values with the device.
+		 *
+		 * \param cfg New dynamic reconfigure values to be sent to the device
+		 * \param lvl Level of change in the values (indicates if reset is necessary)
+		 */
+		void REVLimitsDynReCB( pololu_smc_driver::SMCLimitsConfig &cfg, const uint32_t lvl );
+		/*!
 		 * \brief Callback for the Diagnostic Updater Timer
 		 *
 		 * \author Scott K Logan
@@ -263,6 +337,30 @@ namespace pololu_smc_driver
 		 */
 		ros::NodeHandle nh_priv;
 		/*!
+		 * \brief Private NodeHanlde used to interface with ROS for Channel RC1 Config
+		 */
+		ros::NodeHandle rc1_nh_priv;
+		/*!
+		 * \brief Private NodeHanlde used to interface with ROS for Channel RC2 Config
+		 */
+		ros::NodeHandle rc2_nh_priv;
+		/*!
+		 * \brief Private NodeHanlde used to interface with ROS for Channel Analog1 Config
+		 */
+		ros::NodeHandle analog1_nh_priv;
+		/*!
+		 * \brief Private NodeHanlde used to interface with ROS for Channel Analog2 Config
+		 */
+		ros::NodeHandle analog2_nh_priv;
+		/*!
+		 * \brief Private NodeHanlde used to interface with ROS for Forward Limits Config
+		 */
+		ros::NodeHandle fwlimits_nh_priv;
+		/*!
+		 * \brief Private NodeHanlde used to interface with ROS for Reverse Limits Config
+		 */
+		ros::NodeHandle revlimits_nh_priv;
+		/*!
 		 * \brief Subscription to speed control data
 		 */
 		ros::Subscriber speed_sub;
@@ -279,9 +377,57 @@ namespace pololu_smc_driver
 		 */
 		dynamic_reconfigure::Server<pololu_smc_driver::SMCDriverConfig> *dyn_re;
 		/*!
+		 * \brief Dynamic reconfigure server for Channel RC1
+		 */
+		dynamic_reconfigure::Server<pololu_smc_driver::SMCChannelConfig> *rc1_dyn_re;
+		/*!
+		 * \brief Dynamic reconfigure server for Channel RC2
+		 */
+		dynamic_reconfigure::Server<pololu_smc_driver::SMCChannelConfig> *rc2_dyn_re;
+		/*!
+		 * \brief Dynamic reconfigure server for Channel Analog1
+		 */
+		dynamic_reconfigure::Server<pololu_smc_driver::SMCChannelConfig> *analog1_dyn_re;
+		/*!
+		 * \brief Dynamic reconfigure server for Channel Analog2
+		 */
+		dynamic_reconfigure::Server<pololu_smc_driver::SMCChannelConfig> *analog2_dyn_re;
+		/*!
+		 * \brief Dynamic reconfigure server for Forward Limits
+		 */
+		dynamic_reconfigure::Server<pololu_smc_driver::SMCLimitsConfig> *fwlimits_dyn_re;
+		/*!
+		 * \brief Dynamic reconfigure server for Reverse Limits
+		 */
+		dynamic_reconfigure::Server<pololu_smc_driver::SMCLimitsConfig> *revlimits_dyn_re;
+		/*!
 		 * \brief Dynamic reconfigure callback handle
 		 */
 		dynamic_reconfigure::Server<pololu_smc_driver::SMCDriverConfig>::CallbackType dyn_re_cb_type;
+		/*!
+		 * \brief Dynamic reconfigure callback handle for Channel RC1
+		 */
+		dynamic_reconfigure::Server<pololu_smc_driver::SMCChannelConfig>::CallbackType rc1_dyn_re_cb_type;
+		/*!
+		 * \brief Dynamic reconfigure callback handle for Channel RC2
+		 */
+		dynamic_reconfigure::Server<pololu_smc_driver::SMCChannelConfig>::CallbackType rc2_dyn_re_cb_type;
+		/*!
+		 * \brief Dynamic reconfigure callback handle for Channel Analog1
+		 */
+		dynamic_reconfigure::Server<pololu_smc_driver::SMCChannelConfig>::CallbackType analog1_dyn_re_cb_type;
+		/*!
+		 * \brief Dynamic reconfigure callback handle for Channel Analog2
+		 */
+		dynamic_reconfigure::Server<pololu_smc_driver::SMCChannelConfig>::CallbackType analog2_dyn_re_cb_type;
+		/*!
+		 * \brief Dynamic reconfigure callback handle for Forward Limits
+		 */
+		dynamic_reconfigure::Server<pololu_smc_driver::SMCLimitsConfig>::CallbackType fwlimits_dyn_re_cb_type;
+		/*!
+		 * \brief Dynamic reconfigure callback handle for Reverse Limits
+		 */
+		dynamic_reconfigure::Server<pololu_smc_driver::SMCLimitsConfig>::CallbackType revlimits_dyn_re_cb_type;
 		/*!
 		 * \brief Timer for calling the diagnostic update function
 		 */

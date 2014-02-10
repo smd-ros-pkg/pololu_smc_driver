@@ -46,7 +46,6 @@ from dynamic_reconfigure.parameter_generator_catkin import *
 
 ## \brief Parameter generator for SMC dynamic reconfigure
 gen = ParameterGenerator( )
-# driver_params = gen.add_group( "Driver Parameters" )
 
 gen.add( "neverSuspend", bool_t, SensorLevels.RECONFIGURE_RUNNING, "Never enter USB suspend.", False )
 gen.add( "uartResponseDelay", bool_t, SensorLevels.RECONFIGURE_RUNNING, "Insert delay before serial responses.", False )

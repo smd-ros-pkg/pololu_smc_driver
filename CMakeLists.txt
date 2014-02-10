@@ -38,7 +38,11 @@ pkg_check_modules(LIBUSB1 REQUIRED libusb-1.0)
 #   std_msgs
 # )
 
-generate_dynamic_reconfigure_options(cfg/SMCDriver.py)
+generate_dynamic_reconfigure_options(
+  cfg/SMCDriver.py
+  cfg/SMCChannel.py
+  cfg/SMCLimits.py
+)
 
 ###################################################
 ## Declare things to be passed to other projects ##

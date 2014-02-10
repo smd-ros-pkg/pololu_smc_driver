@@ -47,8 +47,26 @@ namespace pololu_smc_driver
 {
 	SMCDriver::SMCDriver( const ros::NodeHandle &_nh_priv, const std::string _serial ) :
 		nh_priv( _nh_priv ),
+		rc1_nh_priv( nh_priv, "rc1" ),
+		rc2_nh_priv( nh_priv, "rc2" ),
+		analog1_nh_priv( nh_priv, "analog1" ),
+		analog2_nh_priv( nh_priv, "analog2" ),
+		fwlimits_nh_priv( nh_priv, "fwlimits" ),
+		revlimits_nh_priv( nh_priv, "revlimits" ),
 		dyn_re( NULL ),
+		rc1_dyn_re( NULL ),
+		rc2_dyn_re( NULL ),
+		analog1_dyn_re( NULL ),
+		analog2_dyn_re( NULL ),
+		fwlimits_dyn_re( NULL ),
+		revlimits_dyn_re( NULL ),
 		dyn_re_cb_type( boost::bind( &SMCDriver::DynReCB, this, _1, _2) ),
+		rc1_dyn_re_cb_type( boost::bind( &SMCDriver::RC1DynReCB, this, _1, _2) ),
+		rc2_dyn_re_cb_type( boost::bind( &SMCDriver::RC2DynReCB, this, _1, _2) ),
+		analog1_dyn_re_cb_type( boost::bind( &SMCDriver::Analog1DynReCB, this, _1, _2) ),
+		analog2_dyn_re_cb_type( boost::bind( &SMCDriver::Analog2DynReCB, this, _1, _2) ),
+		fwlimits_dyn_re_cb_type( boost::bind( &SMCDriver::FWLimitsDynReCB, this, _1, _2) ),
+		revlimits_dyn_re_cb_type( boost::bind( &SMCDriver::REVLimitsDynReCB, this, _1, _2) ),
 		min_update_rate( 10.0 ),
 		max_update_rate( 100.0 ),
 		diag_up_freq( diagnostic_updater::FrequencyStatusParam( &min_update_rate, &max_update_rate, 0.1, 5 ) ),
@@ -95,7 +113,6 @@ namespace pololu_smc_driver
 
 	void SMCDriver::DynReCB( pololu_smc_driver::SMCDriverConfig &cfg, const uint32_t lvl )
 	{
-		/// \todo Implement settings changes
 		if( !SMCStat( ) )
 			return;
 
@@ -137,6 +154,146 @@ namespace pololu_smc_driver
 			return;
 	}
 
+	void SMCDriver::RC1DynReCB( pololu_smc_driver::SMCChannelConfig &cfg, const uint32_t lvl )
+	{
+		if( !SMCStat( ) )
+			return;
+
+		struct SmcSettings set;
+
+		if( smc_get_settings( smcd, &set, 5000 ) < 0 )
+			return;
+
+		set.rc1.invert = cfg.invert;
+		set.rc1.scalingDegree = cfg.scalingDegree;
+		set.rc1.alternateUse = cfg.alternateUse;
+		set.rc1.pinMode = cfg.pinMode;
+		set.rc1.errorMin = cfg.errorMin;
+		set.rc1.errorMax = cfg.errorMax;
+		set.rc1.inputMin = cfg.inputMin;
+		set.rc1.inputMax = cfg.inputMax;
+		set.rc1.inputNeutralMin = cfg.inputNeutralMin;
+		set.rc1.inputNeutralMax = cfg.inputNeutralMax;
+
+		if( smc_set_settings( smcd, &set, 5000 ) < 0 )
+			return;
+	}
+
+	void SMCDriver::RC2DynReCB( pololu_smc_driver::SMCChannelConfig &cfg, const uint32_t lvl )
+	{
+		if( !SMCStat( ) )
+			return;
+
+		struct SmcSettings set;
+
+		if( smc_get_settings( smcd, &set, 5000 ) < 0 )
+			return;
+
+		set.rc2.invert = cfg.invert;
+		set.rc2.scalingDegree = cfg.scalingDegree;
+		set.rc2.alternateUse = cfg.alternateUse;
+		set.rc2.pinMode = cfg.pinMode;
+		set.rc2.errorMin = cfg.errorMin;
+		set.rc2.errorMax = cfg.errorMax;
+		set.rc2.inputMin = cfg.inputMin;
+		set.rc2.inputMax = cfg.inputMax;
+		set.rc2.inputNeutralMin = cfg.inputNeutralMin;
+		set.rc2.inputNeutralMax = cfg.inputNeutralMax;
+
+		if( smc_set_settings( smcd, &set, 5000 ) < 0 )
+			return;
+	}
+
+	void SMCDriver::Analog1DynReCB( pololu_smc_driver::SMCChannelConfig &cfg, const uint32_t lvl )
+	{
+		if( !SMCStat( ) )
+			return;
+
+		struct SmcSettings set;
+
+		if( smc_get_settings( smcd, &set, 5000 ) < 0 )
+			return;
+
+		set.analog1.invert = cfg.invert;
+		set.analog1.scalingDegree = cfg.scalingDegree;
+		set.analog1.alternateUse = cfg.alternateUse;
+		set.analog1.pinMode = cfg.pinMode;
+		set.analog1.errorMin = cfg.errorMin;
+		set.analog1.errorMax = cfg.errorMax;
+		set.analog1.inputMin = cfg.inputMin;
+		set.analog1.inputMax = cfg.inputMax;
+		set.analog1.inputNeutralMin = cfg.inputNeutralMin;
+		set.analog1.inputNeutralMax = cfg.inputNeutralMax;
+
+		if( smc_set_settings( smcd, &set, 5000 ) < 0 )
+			return;
+	}
+
+	void SMCDriver::Analog2DynReCB( pololu_smc_driver::SMCChannelConfig &cfg, const uint32_t lvl )
+	{
+		if( !SMCStat( ) )
+			return;
+
+		struct SmcSettings set;
+
+		if( smc_get_settings( smcd, &set, 5000 ) < 0 )
+			return;
+
+		set.analog2.invert = cfg.invert;
+		set.analog2.scalingDegree = cfg.scalingDegree;
+		set.analog2.alternateUse = cfg.alternateUse;
+		set.analog2.pinMode = cfg.pinMode;
+		set.analog2.errorMin = cfg.errorMin;
+		set.analog2.errorMax = cfg.errorMax;
+		set.analog2.inputMin = cfg.inputMin;
+		set.analog2.inputMax = cfg.inputMax;
+		set.analog2.inputNeutralMin = cfg.inputNeutralMin;
+		set.analog2.inputNeutralMax = cfg.inputNeutralMax;
+
+		if( smc_set_settings( smcd, &set, 5000 ) < 0 )
+			return;
+	}
+
+	void SMCDriver::FWLimitsDynReCB( pololu_smc_driver::SMCLimitsConfig &cfg, const uint32_t lvl )
+	{
+		if( !SMCStat( ) )
+			return;
+
+		struct SmcSettings set;
+
+		if( smc_get_settings( smcd, &set, 5000 ) < 0 )
+			return;
+
+		set.forwardLimits.maxSpeed = cfg.maxSpeed;
+		set.forwardLimits.maxAcceleration = cfg.maxAcceleration;
+		set.forwardLimits.maxDeceleration = cfg.maxDeceleration;
+		set.forwardLimits.brakeDuration = cfg.brakeDuration;
+		set.forwardLimits.startingSpeed = cfg.startingSpeed;
+
+		if( smc_set_settings( smcd, &set, 5000 ) < 0 )
+			return;
+	}
+
+	void SMCDriver::REVLimitsDynReCB( pololu_smc_driver::SMCLimitsConfig &cfg, const uint32_t lvl )
+	{
+		if( !SMCStat( ) )
+			return;
+
+		struct SmcSettings set;
+
+		if( smc_get_settings( smcd, &set, 5000 ) < 0 )
+			return;
+
+		set.reverseLimits.maxSpeed = cfg.maxSpeed;
+		set.reverseLimits.maxAcceleration = cfg.maxAcceleration;
+		set.reverseLimits.maxDeceleration = cfg.maxDeceleration;
+		set.reverseLimits.brakeDuration = cfg.brakeDuration;
+		set.reverseLimits.startingSpeed = cfg.startingSpeed;
+
+		if( smc_set_settings( smcd, &set, 5000 ) < 0 )
+			return;
+	}
+
 	bool SMCDriver::SMCOpen( )
 	{
 		const char *ser = NULL;
@@ -166,21 +323,61 @@ namespace pololu_smc_driver
 		// needed to wait for the initial device settings load before doing this.
 		if( !dyn_re )
 			dyn_re = new dynamic_reconfigure::Server<pololu_smc_driver::SMCDriverConfig>( dyn_re_mutex, nh_priv );
+		if( !rc1_dyn_re )
+			rc1_dyn_re = new dynamic_reconfigure::Server<pololu_smc_driver::SMCChannelConfig>( dyn_re_mutex, rc1_nh_priv );
+		if( !rc2_dyn_re )
+			rc2_dyn_re = new dynamic_reconfigure::Server<pololu_smc_driver::SMCChannelConfig>( dyn_re_mutex, rc2_nh_priv );
+		if( !analog1_dyn_re )
+			analog1_dyn_re = new dynamic_reconfigure::Server<pololu_smc_driver::SMCChannelConfig>( dyn_re_mutex, analog1_nh_priv );
+		if( !analog2_dyn_re )
+			analog2_dyn_re = new dynamic_reconfigure::Server<pololu_smc_driver::SMCChannelConfig>( dyn_re_mutex, analog2_nh_priv );
+		if( !fwlimits_dyn_re )
+			fwlimits_dyn_re = new dynamic_reconfigure::Server<pololu_smc_driver::SMCLimitsConfig>( dyn_re_mutex, fwlimits_nh_priv );
+		if( !revlimits_dyn_re )
+			revlimits_dyn_re = new dynamic_reconfigure::Server<pololu_smc_driver::SMCLimitsConfig>( dyn_re_mutex, revlimits_nh_priv );
+
 		dyn_re->setCallback( dyn_re_cb_type );
-		speed_sub = nh_priv.subscribe( "speed", 1, &SMCDriver::SpeedCB, this );
-		safe_start_srv = nh_priv.advertiseService( "safe_start", &SMCDriver::SafeStartCB, this );
-		estop_srv = nh_priv.advertiseService( "estop", &SMCDriver::EStopCB, this );
+		rc1_dyn_re->setCallback( rc1_dyn_re_cb_type );
+		rc2_dyn_re->setCallback( rc2_dyn_re_cb_type );
+		analog1_dyn_re->setCallback( analog1_dyn_re_cb_type );
+		analog2_dyn_re->setCallback( analog2_dyn_re_cb_type );
+		fwlimits_dyn_re->setCallback( fwlimits_dyn_re_cb_type );
+		revlimits_dyn_re->setCallback( revlimits_dyn_re_cb_type );
+
+		if( !speed_sub )
+			speed_sub = nh_priv.subscribe( "speed", 1, &SMCDriver::SpeedCB, this );
+		if( !safe_start_srv )
+			safe_start_srv = nh_priv.advertiseService( "safe_start", &SMCDriver::SafeStartCB, this );
+		if( !estop_srv )
+			estop_srv = nh_priv.advertiseService( "estop", &SMCDriver::EStopCB, this );
 
 		return true;
 	}
 
 	void SMCDriver::SMCClose( )
 	{
-		estop_srv.shutdown( );
-		safe_start_srv.shutdown( );
-		speed_sub.shutdown( );
+		if( estop_srv )
+			estop_srv.shutdown( );
+		if( safe_start_srv )
+			safe_start_srv.shutdown( );
+		if( speed_sub )
+			speed_sub.shutdown( );
+
 		if( dyn_re )
 			dyn_re->clearCallback( );
+		if( rc1_dyn_re )
+			rc1_dyn_re->clearCallback( );
+		if( rc2_dyn_re )
+			rc2_dyn_re->clearCallback( );
+		if( analog1_dyn_re )
+			analog1_dyn_re->clearCallback( );
+		if( analog2_dyn_re )
+			analog2_dyn_re->clearCallback( );
+		if( fwlimits_dyn_re )
+			fwlimits_dyn_re->clearCallback( );
+		if( revlimits_dyn_re )
+			revlimits_dyn_re->clearCallback( );
+
 		smc_close( smcd );
 		smcd = -1;
 	}
@@ -449,49 +646,216 @@ namespace pololu_smc_driver
 		if( smc_get_settings( smcd, &set, 5000 ) < 0 )
 			return false;
 
-		struct pololu_smc_driver::SMCDriverConfig cfg;
+		// SMCDriver
+		{
+			struct pololu_smc_driver::SMCDriverConfig cfg;
 
-		// Start with the device config
-		cfg.neverSuspend = set.neverSuspend;
-		cfg.uartResponseDelay = set.uartResponseDelay;
-		cfg.useFixedBaudRate = set.useFixedBaudRate;
-		cfg.disableSafeStart = set.disableSafeStart;
-		cfg.fixedBaudRateRegister = set.fixedBaudRateRegister;
-		cfg.speedUpdatePeriod = set.speedUpdatePeriod;
-		cfg.commandTimeout = set.commandTimeout;
-		cfg.serialDeviceNumber = set.serialDeviceNumber;
-		cfg.crcMode = set.crcMode;
-		cfg.overTempMin = set.overTempMin;
-		cfg.overTempMax = set.overTempMax;
-		cfg.inputMode = set.inputMode;
-		cfg.pwmMode = set.pwmMode;
-		cfg.pwmPeriodFactor = set.pwmPeriodFactor;
-		cfg.mixingMode = set.mixingMode;
-		cfg.minPulsePeriod = set.minPulsePeriod;
-		cfg.maxPulsePeriod = set.maxPulsePeriod;
-		cfg.rcTimeout = set.rcTimeout;
-		cfg.ignorePotDisconnect = set.ignorePotDisconnect;
-		cfg.tempLimitGradual = set.tempLimitGradual;
-		cfg.consecGoodPulses = set.consecGoodPulses;
-		cfg.motorInvert = set.motorInvert;
-		cfg.speedZeroBrakeAmount = set.speedZeroBrakeAmount;
-		cfg.ignoreErrLineHigh = set.ignoreErrLineHigh;
-		cfg.vinMultiplierOffset = set.vinMultiplierOffset;
-		cfg.lowVinShutoffTimeout = set.lowVinShutoffTimeout;
-		cfg.lowVinShutoffMv = set.lowVinShutoffMv;
-		cfg.serialMode = set.serialMode;
+			// Start with the device config
+			cfg.neverSuspend = set.neverSuspend;
+			cfg.uartResponseDelay = set.uartResponseDelay;
+			cfg.useFixedBaudRate = set.useFixedBaudRate;
+			cfg.disableSafeStart = set.disableSafeStart;
+			cfg.fixedBaudRateRegister = set.fixedBaudRateRegister;
+			cfg.speedUpdatePeriod = set.speedUpdatePeriod;
+			cfg.commandTimeout = set.commandTimeout;
+			cfg.serialDeviceNumber = set.serialDeviceNumber;
+			cfg.crcMode = set.crcMode;
+			cfg.overTempMin = set.overTempMin;
+			cfg.overTempMax = set.overTempMax;
+			cfg.inputMode = set.inputMode;
+			cfg.pwmMode = set.pwmMode;
+			cfg.pwmPeriodFactor = set.pwmPeriodFactor;
+			cfg.mixingMode = set.mixingMode;
+			cfg.minPulsePeriod = set.minPulsePeriod;
+			cfg.maxPulsePeriod = set.maxPulsePeriod;
+			cfg.rcTimeout = set.rcTimeout;
+			cfg.ignorePotDisconnect = set.ignorePotDisconnect;
+			cfg.tempLimitGradual = set.tempLimitGradual;
+			cfg.consecGoodPulses = set.consecGoodPulses;
+			cfg.motorInvert = set.motorInvert;
+			cfg.speedZeroBrakeAmount = set.speedZeroBrakeAmount;
+			cfg.ignoreErrLineHigh = set.ignoreErrLineHigh;
+			cfg.vinMultiplierOffset = set.vinMultiplierOffset;
+			cfg.lowVinShutoffTimeout = set.lowVinShutoffTimeout;
+			cfg.lowVinShutoffMv = set.lowVinShutoffMv;
+			cfg.serialMode = set.serialMode;
 
-		// Merge in the parameter server's values. These changes will be pushed to the
-		// device when the callback is set later
-		cfg.__fromServer__( nh_priv );
-		cfg.__clamp__( );
+			// Merge in the parameter server's values. These changes will be pushed to the
+			// device when the callback is set later
+			cfg.__fromServer__( nh_priv );
+			cfg.__clamp__( );
 
-		// If DR server is running, update it internally. Otherwise, make sure
-		// parameter server is right when it starts up
-		if( dyn_re )
-			dyn_re->updateConfig( cfg );
-		else
-			cfg.__toServer__( nh_priv );
+			// If DR server is running, update it internally. Otherwise, make sure
+			// parameter server is right when it starts up
+			if( dyn_re )
+				dyn_re->updateConfig( cfg );
+			else
+				cfg.__toServer__( nh_priv );
+		}
+
+		// SMCChannel RC1
+		{
+			struct pololu_smc_driver::SMCChannelConfig cfg;
+
+			// Start with the device config
+			cfg.invert = set.rc1.invert;
+			cfg.scalingDegree = set.rc1.scalingDegree;
+			cfg.alternateUse = set.rc1.alternateUse;
+			cfg.pinMode = set.rc1.pinMode;
+			cfg.errorMin = set.rc1.errorMin;
+			cfg.errorMax = set.rc1.errorMax;
+			cfg.inputMin = set.rc1.inputMin;
+			cfg.inputMax = set.rc1.inputMax;
+			cfg.inputNeutralMin = set.rc1.inputNeutralMin;
+			cfg.inputNeutralMax = set.rc1.inputNeutralMax;
+
+			// Merge in the parameter server's values. These changes will be pushed to the
+			// device when the callback is set later
+			cfg.__fromServer__( rc1_nh_priv );
+			cfg.__clamp__( );
+
+			// If DR server is running, update it internally. Otherwise, make sure
+			// parameter server is right when it starts up
+			if( rc1_dyn_re )
+				rc1_dyn_re->updateConfig( cfg );
+			else
+				cfg.__toServer__( rc1_nh_priv );
+		}
+
+		// SMCChannel RC2
+		{
+			struct pololu_smc_driver::SMCChannelConfig cfg;
+
+			// Start with the device config
+			cfg.invert = set.rc2.invert;
+			cfg.scalingDegree = set.rc2.scalingDegree;
+			cfg.alternateUse = set.rc2.alternateUse;
+			cfg.pinMode = set.rc2.pinMode;
+			cfg.errorMin = set.rc2.errorMin;
+			cfg.errorMax = set.rc2.errorMax;
+			cfg.inputMin = set.rc2.inputMin;
+			cfg.inputMax = set.rc2.inputMax;
+			cfg.inputNeutralMin = set.rc2.inputNeutralMin;
+			cfg.inputNeutralMax = set.rc2.inputNeutralMax;
+
+			// Merge in the parameter server's values. These changes will be pushed to the
+			// device when the callback is set later
+			cfg.__fromServer__( rc2_nh_priv );
+			cfg.__clamp__( );
+
+			// If DR server is running, update it internally. Otherwise, make sure
+			// parameter server is right when it starts up
+			if( rc2_dyn_re )
+				rc2_dyn_re->updateConfig( cfg );
+			else
+				cfg.__toServer__( rc2_nh_priv );
+		}
+
+		// SMCChannel Analog1
+		{
+			struct pololu_smc_driver::SMCChannelConfig cfg;
+
+			// Start with the device config
+			cfg.invert = set.analog1.invert;
+			cfg.scalingDegree = set.analog1.scalingDegree;
+			cfg.alternateUse = set.analog1.alternateUse;
+			cfg.pinMode = set.analog1.pinMode;
+			cfg.errorMin = set.analog1.errorMin;
+			cfg.errorMax = set.analog1.errorMax;
+			cfg.inputMin = set.analog1.inputMin;
+			cfg.inputMax = set.analog1.inputMax;
+			cfg.inputNeutralMin = set.analog1.inputNeutralMin;
+			cfg.inputNeutralMax = set.analog1.inputNeutralMax;
+
+			// Merge in the parameter server's values. These changes will be pushed to the
+			// device when the callback is set later
+			cfg.__fromServer__( analog1_nh_priv );
+			cfg.__clamp__( );
+
+			// If DR server is running, update it internally. Otherwise, make sure
+			// parameter server is right when it starts up
+			if( analog1_dyn_re )
+				analog1_dyn_re->updateConfig( cfg );
+			else
+				cfg.__toServer__( analog1_nh_priv );
+		}
+
+		// SMCChannel Analog2
+		{
+			struct pololu_smc_driver::SMCChannelConfig cfg;
+
+			// Start with the device config
+			cfg.invert = set.analog2.invert;
+			cfg.scalingDegree = set.analog2.scalingDegree;
+			cfg.alternateUse = set.analog2.alternateUse;
+			cfg.pinMode = set.analog2.pinMode;
+			cfg.errorMin = set.analog2.errorMin;
+			cfg.errorMax = set.analog2.errorMax;
+			cfg.inputMin = set.analog2.inputMin;
+			cfg.inputMax = set.analog2.inputMax;
+			cfg.inputNeutralMin = set.analog2.inputNeutralMin;
+			cfg.inputNeutralMax = set.analog2.inputNeutralMax;
+
+			// Merge in the parameter server's values. These changes will be pushed to the
+			// device when the callback is set later
+			cfg.__fromServer__( analog2_nh_priv );
+			cfg.__clamp__( );
+
+			// If DR server is running, update it internally. Otherwise, make sure
+			// parameter server is right when it starts up
+			if( analog2_dyn_re )
+				analog2_dyn_re->updateConfig( cfg );
+			else
+				cfg.__toServer__( analog2_nh_priv );
+		}
+
+		// SMCLimits Forward
+		{
+			struct pololu_smc_driver::SMCLimitsConfig cfg;
+
+			// Start with the device config
+			cfg.maxSpeed = set.forwardLimits.maxSpeed;
+			cfg.maxAcceleration = set.forwardLimits.maxAcceleration;
+			cfg.maxDeceleration = set.forwardLimits.maxDeceleration;
+			cfg.brakeDuration = set.forwardLimits.brakeDuration;
+			cfg.startingSpeed = set.forwardLimits.startingSpeed;
+
+			// Merge in the parameter server's values. These changes will be pushed to the
+			// device when the callback is set later
+			cfg.__fromServer__( fwlimits_nh_priv );
+			cfg.__clamp__( );
+
+			// If DR server is running, update it internally. Otherwise, make sure
+			// parameter server is right when it starts up
+			if( fwlimits_dyn_re )
+				fwlimits_dyn_re->updateConfig( cfg );
+			else
+				cfg.__toServer__( fwlimits_nh_priv );
+		}
+
+		// SMCLimits Reverse
+		{
+			struct pololu_smc_driver::SMCLimitsConfig cfg;
+
+			// Start with the device config
+			cfg.maxSpeed = set.reverseLimits.maxSpeed;
+			cfg.maxAcceleration = set.reverseLimits.maxAcceleration;
+			cfg.maxDeceleration = set.reverseLimits.maxDeceleration;
+			cfg.brakeDuration = set.reverseLimits.brakeDuration;
+			cfg.startingSpeed = set.reverseLimits.startingSpeed;
+
+			// Merge in the parameter server's values. These changes will be pushed to the
+			// device when the callback is set later
+			cfg.__fromServer__( revlimits_nh_priv );
+			cfg.__clamp__( );
+
+			// If DR server is running, update it internally. Otherwise, make sure
+			// parameter server is right when it starts up
+			if( revlimits_dyn_re )
+				revlimits_dyn_re->updateConfig( cfg );
+			else
+				cfg.__toServer__( revlimits_nh_priv );
+		}
 
 		return true;
 	}
