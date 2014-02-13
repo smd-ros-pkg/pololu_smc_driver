@@ -80,6 +80,7 @@ add_library(smc_driver_nodelet
 )
 
 ## Declare a cpp executable
+add_executable(smc_list src/smc_list.c)
 add_executable(smc_driver_node src/smc_driver_node.cpp)
 
 ## Add dependencies to the executable
@@ -88,6 +89,10 @@ add_dependencies(smc_driver_node smc_driver)
 add_dependencies(smc_driver_nodelet smc_driver)
 
 ## Specify libraries to link a library or executable target against
+target_link_libraries(smc_list
+  smc
+  ${LIBUSB1_LIBRARIES}
+)
 target_link_libraries(smc_driver
   smc
   ${LIBUSB1_LIBRARIES}
@@ -113,8 +118,8 @@ target_link_libraries(smc_driver_nodelet
 # )
 
 ## Mark executables and/or libraries for installation
-install(TARGETS smc smc_driver smc_driver_node smc_driver_nodelet
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+install(TARGETS smc smc_list smc_driver smc_driver_node smc_driver_nodelet
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
