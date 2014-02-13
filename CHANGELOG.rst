@@ -2,6 +2,15 @@
 Changelog for package pololu_smc_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add VIN, rename Channel to more general Input
+  Also fixed a possible segfault on disconnect in the input timer routines
+* Add udev rules
+* Add device list tool
+* Add lookup for SMC model name
+* Contributors: Scott K Logan
+
 0.1.6 (2014-02-10)
 ------------------
 * Actual topics for channel data (up to 1000Hz polling)
