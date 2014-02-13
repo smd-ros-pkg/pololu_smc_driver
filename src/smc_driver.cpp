@@ -78,13 +78,14 @@ namespace pololu_smc_driver
 		channel_pub_cb( boost::bind( &SMCDriver::ChannelPubCB, this ) ),
 		smcd( -1 ),
 		serial( _serial ),
+		model( "" ),
 		joint_name( "motor" ),
 		channelQueryRate( 1.0 )
 	{
 		smc_init( );
 		nh_priv.param( "joint_name", joint_name, joint_name );
 		nh_priv.param( "channelQueryRate", channelQueryRate, channelQueryRate );
-		diag.setHardwareIDf( "Pololu SMC %s", serial.length( ) ? serial.c_str( ) : "(unknown serial)" );
+		diag.setHardwareIDf( "Pololu SMC %s", serial.length( ) ? serial.c_str( ) : "(unknown device)" );
 		diag.add( "Pololu SMC Status", this, &SMCDriver::DiagCB );
 		diag.add( diag_up_freq );
 		diag_timer = nh_priv.createWallTimer( ros::WallDuration( 1 ), &SMCDriver::DiagTimerCB, this );
@@ -335,7 +336,8 @@ namespace pololu_smc_driver
 		char mySerial[256];
 		smc_get_serial( smcd, mySerial );
 		serial = mySerial;
-		diag.setHardwareIDf( "Pololu SMC %s", mySerial );
+		model = smc_get_model( smcd );
+		diag.setHardwareIDf( "Pololu SMC %s %s", model, mySerial );
 
 		if( !merge_settings( ) )
 		{

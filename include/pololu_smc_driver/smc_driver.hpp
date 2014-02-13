@@ -546,6 +546,11 @@ namespace pololu_smc_driver
 		 */
 		std::string serial;
 		/*!
+		 * \brief C string which indicates the model of the currently connected
+		 *   device
+		 */
+		const char *model;
+		/*!
 		 * \brief Joint name to set speed based on (within received JointTrajectory
 		 *   message
 		 */

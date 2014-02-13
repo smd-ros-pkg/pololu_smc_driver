@@ -166,6 +166,10 @@ struct smc_priv
 	 * \brief Serial number of the USB device.
 	 */
 	char *serial;
+	/*!
+	 * \brief USB product ID of this device.
+	 */
+	uint16_t idProduct;
 };
 
 /*!
@@ -303,6 +307,7 @@ int smc_open( const char *serial )
 				smc_list[mydev]->kdriver_active = kernel_driver_active;
 				smc_list[mydev]->serial = malloc( sizeof( char ) * ( strlen( mySerial ) + 1 ) );
 				strcpy( smc_list[mydev]->serial, mySerial );
+				smc_list[mydev]->idProduct = desc.idProduct;
 
 				libusb_free_device_list( devs, 1 );
 				return mydev;
@@ -509,4 +514,118 @@ void smc_exit( )
 	if( ctx )
 		libusb_exit( ctx );
 	ctx = NULL;
+}
+
+struct SmcList * smc_list_devices( )
+{
+	struct SmcList *lst = NULL;
+	struct SmcList *lst_curr = NULL;
+	libusb_device **devs;
+	ssize_t c;
+	ssize_t i;
+	int r;
+
+	c = libusb_get_device_list( ctx, &devs );
+
+	if( c < 0 )
+		return lst;
+
+	for( i = 0; i < c; i++ )
+	{
+		struct libusb_device_descriptor desc;
+
+		r = libusb_get_device_descriptor( devs[i], &desc );
+		if( r || desc.idVendor != idVendorTarget )
+			continue;
+
+		unsigned short int j;
+		for( j = 0; j < NUM_PRODUCTS; j++ )
+		{
+			if( desc.idProduct == idProductTargetArr[j] )
+			{
+				if( !lst )
+				{
+					lst = malloc( sizeof( struct SmcList ) );
+					if( !lst )
+						break;
+					lst_curr = lst;
+				}
+				else
+				{
+					lst_curr->next = malloc( sizeof( struct SmcList ) );
+					if( !lst_curr->next )
+						break;
+					lst_curr = lst_curr->next;
+				}
+	
+				lst_curr->idVendor = desc.idVendor;
+				lst_curr->idProduct = desc.idProduct;
+				lst_curr->iSerialNumber = NULL;
+				lst_curr->next = NULL;
+
+				libusb_device_handle *dev_handle;
+				unsigned short int kernel_driver_active = 0;
+
+				r = libusb_open( devs[i], &dev_handle );
+				if( r )
+					break;
+
+				char mySerial[256];
+
+				r = libusb_get_string_descriptor_ascii( dev_handle, desc.iSerialNumber, (unsigned char *)mySerial, 256 );
+				if( r < 0 )
+				{
+					libusb_close( dev_handle );
+					break;
+				}
+
+				lst_curr->iSerialNumber = malloc( strlen( mySerial ) + 1 );
+				strcpy( lst_curr->iSerialNumber, mySerial );
+
+				libusb_close( dev_handle );
+
+				break;
+			}
+		}
+	}
+
+	libusb_free_device_list( devs, 1 );
+	return lst;
+}
+
+void smc_free_list( struct SmcList *lst )
+{
+	struct SmcList *lst_tmp;
+
+	while( lst )
+	{
+		lst_tmp = lst;
+		lst = lst->next;
+		free( lst_tmp->iSerialNumber );
+		free( lst_tmp );
+	}
+}
+
+const char * smc_lookup( uint16_t idProduct )
+{
+	switch( idProduct )
+	{
+	case 0x0098:
+		return "18v15";
+	case 0x009A:
+		return "24v12";
+	case 0x009C:
+		return "18v25";
+	case 0x009E:
+		return "24v23";
+	case 0x00A1:
+		return "18v7";
+	default:
+		return NULL;
+	}
+}
+
+const char * smc_get_model( int smcd )
+{
+	return smc_lookup( smc_list[smcd]->idProduct );
 }
