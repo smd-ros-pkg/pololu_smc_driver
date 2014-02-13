@@ -2,8 +2,8 @@
 Changelog for package pololu_smc_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.7 (2014-02-12)
+------------------
 * Add VIN, rename Channel to more general Input
   Also fixed a possible segfault on disconnect in the input timer routines
 * Add udev rules
