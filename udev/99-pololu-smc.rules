@@ -1,0 +1,5 @@
+SUBSYSTEM=="usb",DRIVER=="usb",ATTR{idVendor}=="1ffb",ATTR{idProduct}=="0098",MODE="0666"
+SUBSYSTEM=="usb",DRIVER=="usb",ATTR{idVendor}=="1ffb",ATTR{idProduct}=="009a",MODE="0666"
+SUBSYSTEM=="usb",DRIVER=="usb",ATTR{idVendor}=="1ffb",ATTR{idProduct}=="009c",MODE="0666"
+SUBSYSTEM=="usb",DRIVER=="usb",ATTR{idVendor}=="1ffb",ATTR{idProduct}=="009e",MODE="0666"
+SUBSYSTEM=="usb",DRIVER=="usb",ATTR{idVendor}=="1ffb",ATTR{idProduct}=="00a1",MODE="0666"
