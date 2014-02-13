@@ -75,21 +75,21 @@ namespace pololu_smc_driver
 		min_update_rate( 10.0 ),
 		max_update_rate( 100.0 ),
 		diag_up_freq( diagnostic_updater::FrequencyStatusParam( &min_update_rate, &max_update_rate, 0.1, 5 ) ),
-		channel_pub_cb( boost::bind( &SMCDriver::ChannelPubCB, this ) ),
+		input_pub_cb( boost::bind( &SMCDriver::InputPubCB, this ) ),
 		smcd( -1 ),
 		serial( _serial ),
 		model( "" ),
 		joint_name( "motor" ),
-		channelQueryRate( 1.0 )
+		inputQueryRate( 1.0 )
 	{
 		smc_init( );
 		nh_priv.param( "joint_name", joint_name, joint_name );
-		nh_priv.param( "channelQueryRate", channelQueryRate, channelQueryRate );
+		nh_priv.param( "inputQueryRate", inputQueryRate, inputQueryRate );
 		diag.setHardwareIDf( "Pololu SMC %s", serial.length( ) ? serial.c_str( ) : "(unknown device)" );
 		diag.add( "Pololu SMC Status", this, &SMCDriver::DiagCB );
 		diag.add( diag_up_freq );
 		diag_timer = nh_priv.createWallTimer( ros::WallDuration( 1 ), &SMCDriver::DiagTimerCB, this );
-		channel_timer = nh_priv.createWallTimer( ros::WallDuration( 1.0 / channelQueryRate ), &SMCDriver::ChannelTimerCB, this, false, false );
+		input_timer = nh_priv.createWallTimer( ros::WallDuration( 1.0 / inputQueryRate ), &SMCDriver::InputTimerCB, this, false, false );
 	}
 
 	SMCDriver::~SMCDriver( )
@@ -142,10 +142,10 @@ namespace pololu_smc_driver
 		if( smc_get_settings( smcd, &set, 5000 ) < 0 )
 			return;
 
-		if( cfg.channelQueryRate != channelQueryRate )
+		if( cfg.inputQueryRate != inputQueryRate )
 		{
-			channelQueryRate = cfg.channelQueryRate;
-			channel_timer.setPeriod( ros::WallDuration( 1.0 / channelQueryRate ) );
+			inputQueryRate = cfg.inputQueryRate;
+			input_timer.setPeriod( ros::WallDuration( 1.0 / inputQueryRate ) );
 		}
 		set.neverSuspend = cfg.neverSuspend;
 		set.uartResponseDelay = cfg.uartResponseDelay;
@@ -379,38 +379,42 @@ namespace pololu_smc_driver
 			estop_srv = nh_priv.advertiseService( "estop", &SMCDriver::EStopCB, this );
 
 		if( !rc1_raw_pub )
-			rc1_raw_pub = rc1_nh_priv.advertise<std_msgs::Float64>( "raw", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+			rc1_raw_pub = rc1_nh_priv.advertise<std_msgs::Float64>( "raw", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
 		if( !rc1_raw_limited_pub )
-			rc1_raw_limited_pub = rc1_nh_priv.advertise<std_msgs::Float64>( "raw_limited", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+			rc1_raw_limited_pub = rc1_nh_priv.advertise<std_msgs::Float64>( "raw_limited", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
 		if( !rc1_scaled_pub )
-			rc1_scaled_pub = rc1_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+			rc1_scaled_pub = rc1_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
 		if( !rc2_raw_pub )
-			rc2_raw_pub = rc2_nh_priv.advertise<std_msgs::Float64>( "raw", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+			rc2_raw_pub = rc2_nh_priv.advertise<std_msgs::Float64>( "raw", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
 		if( !rc2_raw_limited_pub )
-			rc2_raw_limited_pub = rc2_nh_priv.advertise<std_msgs::Float64>( "raw_limited", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+			rc2_raw_limited_pub = rc2_nh_priv.advertise<std_msgs::Float64>( "raw_limited", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
 		if( !rc2_scaled_pub )
-			rc2_scaled_pub = rc2_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+			rc2_scaled_pub = rc2_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
 		if( !analog1_raw_pub )
-			analog1_raw_pub = analog1_nh_priv.advertise<std_msgs::Float32>( "raw", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+			analog1_raw_pub = analog1_nh_priv.advertise<std_msgs::Float32>( "raw", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
 		if( !analog1_raw_limited_pub )
-			analog1_raw_limited_pub = analog1_nh_priv.advertise<std_msgs::Float32>( "raw_limited", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+			analog1_raw_limited_pub = analog1_nh_priv.advertise<std_msgs::Float32>( "raw_limited", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
 		if( !analog1_scaled_pub )
-			analog1_scaled_pub = analog1_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+			analog1_scaled_pub = analog1_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
 		if( !analog2_raw_pub )
-			analog2_raw_pub = analog2_nh_priv.advertise<std_msgs::Float32>( "raw", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+			analog2_raw_pub = analog2_nh_priv.advertise<std_msgs::Float32>( "raw", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
 		if( !analog2_raw_limited_pub )
-			analog2_raw_limited_pub = analog2_nh_priv.advertise<std_msgs::Float32>( "raw_limited", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+			analog2_raw_limited_pub = analog2_nh_priv.advertise<std_msgs::Float32>( "raw_limited", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
 		if( !analog2_scaled_pub )
-			analog2_scaled_pub = analog2_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, channel_pub_cb, channel_pub_cb, ros::VoidConstPtr( ), true );
+			analog2_scaled_pub = analog2_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
+		if( !vin_pub )
+			vin_pub = nh_priv.advertise<std_msgs::Float32>( "vin", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
 
 		// Check for initial subscribers
-		ChannelPubCB( );
+		InputPubCB( );
 
 		return true;
 	}
 
 	void SMCDriver::SMCClose( )
 	{
+		input_timer.stop( );
+
 		if( estop_srv )
 			estop_srv.shutdown( );
 		if( safe_start_srv )
@@ -436,6 +440,8 @@ namespace pololu_smc_driver
 			analog1_raw_limited_pub.shutdown( );
 		if( analog1_scaled_pub )
 			analog1_scaled_pub.shutdown( );
+		if( vin_pub )
+			vin_pub.shutdown( );
 
 		if( dyn_re )
 			dyn_re->clearCallback( );
@@ -476,9 +482,12 @@ namespace pololu_smc_driver
 		diag_timer.setPeriod( ros::WallDuration( diag.getPeriod( ) ) );
 	}
 
-	void SMCDriver::ChannelTimerCB( const ros::WallTimerEvent &e )
+	void SMCDriver::InputTimerCB( const ros::WallTimerEvent &e )
 	{
 		struct SmcVariables vars;
+
+		if( !SMCStat( ) )
+			return;
 
 		if( smc_get_variables( smcd, &vars, 5000 ) < 0 )
 			return;
@@ -559,9 +568,16 @@ namespace pololu_smc_driver
 			msg->data = vars.analog2.scaledValue;
 			analog2_scaled_pub.publish( msg );
 		}
+		// VIN
+		if( vin_pub )
+		{
+			std_msgs::Float32Ptr msg( new std_msgs::Float32 );
+			msg->data = vars.vinMv / 1000.0;
+			vin_pub.publish( msg );
+		}
 	}
 
-	void SMCDriver::ChannelPubCB( )
+	void SMCDriver::InputPubCB( )
 	{
 		if( rc1_raw_pub.getNumSubscribers( ) > 0 ||
 			rc1_raw_limited_pub.getNumSubscribers( ) > 0 ||
@@ -574,10 +590,11 @@ namespace pololu_smc_driver
 			analog1_scaled_pub.getNumSubscribers( ) > 0 ||
 			analog2_raw_pub.getNumSubscribers( ) > 0 ||
 			analog2_raw_limited_pub.getNumSubscribers( ) > 0 ||
-			analog2_scaled_pub.getNumSubscribers( ) > 0 )
-			channel_timer.start( );
+			analog2_scaled_pub.getNumSubscribers( ) > 0 ||
+			vin_pub.getNumSubscribers( ) > 0 )
+			input_timer.start( );
 		else
-			channel_timer.stop( );
+			input_timer.stop( );
 	}
 
 	void SMCDriver::DiagCB( diagnostic_updater::DiagnosticStatusWrapper &stat )

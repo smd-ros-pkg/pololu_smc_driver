@@ -257,24 +257,24 @@ namespace pololu_smc_driver
 		 */
 		void DiagTimerCB( const ros::WallTimerEvent &e );
 		/*!
-		 * \brief Callback for the Channel Information Timer
+		 * \brief Callback for the Channel and VIN Information Timer
 		 *
 		 * \author Scott K Logan
 		 *
-		 * This timer is used to publish information from the channels on the SMC.
+		 * This timer is used to publish information from the inputs on the SMC.
 		 *
 		 * \param e Timer event (not used)
 		 */
-		void ChannelTimerCB( const ros::WallTimerEvent &e );
+		void InputTimerCB( const ros::WallTimerEvent &e );
 		/*!
-		 * \brief Callback for the Channel Publishers
+		 * \brief Callback for the Channel and VIN Publishers
 		 *
 		 * \author Scott K Logan
 		 *
 		 * This function should be called whenever there is a change in the number
-		 * of subscribers to any of the channel publishers.
+		 * of subscribers to any of the channel or VIN publishers.
 		 */
-		void ChannelPubCB( );
+		void InputPubCB( );
 		/*!
 		 * \brief Diagnostic update callback
 		 *
@@ -439,6 +439,10 @@ namespace pololu_smc_driver
 		 */
 		ros::Publisher analog2_scaled_pub;
 		/*!
+		 * \brief Raw input voltage publisher
+		 */
+		ros::Publisher vin_pub;
+		/*!
 		 * \brief Subscription to speed control data
 		 */
 		ros::Subscriber joint_traj_sub;
@@ -511,9 +515,9 @@ namespace pololu_smc_driver
 		 */
 		ros::WallTimer diag_timer;
 		/*!
-		 * \brief Timer for publishing channel information
+		 * \brief Timer for publishing channel and VIN information
 		 */
-		ros::WallTimer channel_timer;
+		ros::WallTimer input_timer;
 		/*!
 		 * \brief Diagnostic updater
 		 */
@@ -531,9 +535,9 @@ namespace pololu_smc_driver
 		 */
 		diagnostic_updater::FrequencyStatus diag_up_freq;
 		/*!
-		 * \brief Callback for changes to the channel publisher subscribers
+		 * \brief Callback for changes to the channel and VIN publishers' subscribers
 		 */
-		const ros::SubscriberStatusCallback channel_pub_cb;
+		const ros::SubscriberStatusCallback input_pub_cb;
 
 		/*!
 		 * \brief SMC device handle to use when interfacing with the standalone
@@ -556,9 +560,9 @@ namespace pololu_smc_driver
 		 */
 		std::string joint_name;
 		/*!
-		 * \brief Rate at which channel information is queried and published
+		 * \brief Rate at which channel and VIN information is queried and published
 		 */
-		double channelQueryRate;
+		double inputQueryRate;
 	};
 }
 

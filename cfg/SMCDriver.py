@@ -47,7 +47,7 @@ from dynamic_reconfigure.parameter_generator_catkin import *
 ## \brief Parameter generator for SMC dynamic reconfigure
 gen = ParameterGenerator( )
 
-gen.add( "channelQueryRate", double_t, SensorLevels.RECONFIGURE_RUNNING, "How fast to poll for channel information.", 10.0, 0.5, 1000.0 )
+gen.add( "inputQueryRate", double_t, SensorLevels.RECONFIGURE_RUNNING, "How fast to poll for channel and VIN information.", 1.0, 0.5, 1000.0 )
 gen.add( "neverSuspend", bool_t, SensorLevels.RECONFIGURE_RUNNING, "Never enter USB suspend.", False )
 gen.add( "uartResponseDelay", bool_t, SensorLevels.RECONFIGURE_RUNNING, "Insert delay before serial responses.", False )
 gen.add( "useFixedBaudRate", bool_t, SensorLevels.RECONFIGURE_RUNNING, "Don't auto-detect baud rate.", False )
