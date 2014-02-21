@@ -5,13 +5,13 @@
 #
 # \brief Dynamic Reconfigure definitions for Channels
 # \author Scott K Logan
-# \date January 07, 2013
+# \date February 09, 2014
 #
 # This dynamic reconfigure implementation for the SMC driver includes parameters
 # for control of the device's various channels.
 #
 # \section license License (BSD-3)
-# Copyright (c) 2013, Scott K Logan\n
+# Copyright (c) 2014, Scott K Logan\n
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without

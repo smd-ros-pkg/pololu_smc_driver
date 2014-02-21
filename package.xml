@@ -5,7 +5,6 @@
   <description>A set of ROS tools to provide an interface to the Pololu SMC family of motor controllers.</description>
 
   <maintainer email="logans@cottsay.net">Scott K Logan</maintainer>
-  <maintainer email="matthew.w.richard@gmail.com">Matt Richard</maintainer>
 
   <license>BSD</license>
 

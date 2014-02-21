@@ -8,7 +8,7 @@
  * API for the standalone C driver
  *
  * \section license License (BSD-3)
- * Copyright (c) 2013, Scott K Logan\n
+ * Copyright (c) 2013-2014, Scott K Logan\n
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
