@@ -386,31 +386,31 @@ namespace pololu_smc_driver
 			estop_srv = nh_priv.advertiseService( "estop", &SMCDriver::EStopCB, this );
 
 		if( !rc1_raw_pub )
-			rc1_raw_pub = rc1_nh_priv.advertise<std_msgs::Float64>( "raw", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
+			rc1_raw_pub = rc1_nh_priv.advertise<std_msgs::Float64>( "raw", 1, input_pub_cb, input_pub_cb );
 		if( !rc1_raw_limited_pub )
-			rc1_raw_limited_pub = rc1_nh_priv.advertise<std_msgs::Float64>( "raw_limited", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
+			rc1_raw_limited_pub = rc1_nh_priv.advertise<std_msgs::Float64>( "raw_limited", 1, input_pub_cb, input_pub_cb );
 		if( !rc1_scaled_pub )
-			rc1_scaled_pub = rc1_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
+			rc1_scaled_pub = rc1_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, input_pub_cb, input_pub_cb );
 		if( !rc2_raw_pub )
-			rc2_raw_pub = rc2_nh_priv.advertise<std_msgs::Float64>( "raw", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
+			rc2_raw_pub = rc2_nh_priv.advertise<std_msgs::Float64>( "raw", 1, input_pub_cb, input_pub_cb );
 		if( !rc2_raw_limited_pub )
-			rc2_raw_limited_pub = rc2_nh_priv.advertise<std_msgs::Float64>( "raw_limited", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
+			rc2_raw_limited_pub = rc2_nh_priv.advertise<std_msgs::Float64>( "raw_limited", 1, input_pub_cb, input_pub_cb );
 		if( !rc2_scaled_pub )
-			rc2_scaled_pub = rc2_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
+			rc2_scaled_pub = rc2_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, input_pub_cb, input_pub_cb );
 		if( !analog1_raw_pub )
-			analog1_raw_pub = analog1_nh_priv.advertise<std_msgs::Float32>( "raw", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
+			analog1_raw_pub = analog1_nh_priv.advertise<std_msgs::Float32>( "raw", 1, input_pub_cb, input_pub_cb );
 		if( !analog1_raw_limited_pub )
-			analog1_raw_limited_pub = analog1_nh_priv.advertise<std_msgs::Float32>( "raw_limited", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
+			analog1_raw_limited_pub = analog1_nh_priv.advertise<std_msgs::Float32>( "raw_limited", 1, input_pub_cb, input_pub_cb );
 		if( !analog1_scaled_pub )
-			analog1_scaled_pub = analog1_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
+			analog1_scaled_pub = analog1_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, input_pub_cb, input_pub_cb );
 		if( !analog2_raw_pub )
-			analog2_raw_pub = analog2_nh_priv.advertise<std_msgs::Float32>( "raw", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
+			analog2_raw_pub = analog2_nh_priv.advertise<std_msgs::Float32>( "raw", 1, input_pub_cb, input_pub_cb );
 		if( !analog2_raw_limited_pub )
-			analog2_raw_limited_pub = analog2_nh_priv.advertise<std_msgs::Float32>( "raw_limited", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
+			analog2_raw_limited_pub = analog2_nh_priv.advertise<std_msgs::Float32>( "raw_limited", 1, input_pub_cb, input_pub_cb );
 		if( !analog2_scaled_pub )
-			analog2_scaled_pub = analog2_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
+			analog2_scaled_pub = analog2_nh_priv.advertise<std_msgs::Int16>( "scaled", 1, input_pub_cb, input_pub_cb );
 		if( !vin_pub )
-			vin_pub = nh_priv.advertise<std_msgs::Float32>( "vin", 1, input_pub_cb, input_pub_cb, ros::VoidConstPtr( ), true );
+			vin_pub = nh_priv.advertise<std_msgs::Float32>( "vin", 1, input_pub_cb, input_pub_cb );
 
 		// Check for initial subscribers
 		InputPubCB( );
