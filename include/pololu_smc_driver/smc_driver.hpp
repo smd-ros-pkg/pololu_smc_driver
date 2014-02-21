@@ -563,6 +563,10 @@ namespace pololu_smc_driver
 		 * \brief Rate at which channel and VIN information is queried and published
 		 */
 		double inputQueryRate;
+		/*!
+		 * \brief Number of unexpected disconnects from the device have been recorded
+		 */
+		unsigned int disconnects;
 	};
 }
 

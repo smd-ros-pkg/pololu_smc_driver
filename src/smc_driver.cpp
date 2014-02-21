@@ -80,7 +80,8 @@ namespace pololu_smc_driver
 		serial( _serial ),
 		model( "" ),
 		joint_name( "motor" ),
-		inputQueryRate( 1.0 )
+		inputQueryRate( 1.0 ),
+		disconnects( 0 )
 	{
 		smc_init( );
 		nh_priv.param( "joint_name", joint_name, joint_name );
@@ -613,6 +614,7 @@ namespace pololu_smc_driver
 
 		stat.summary( diagnostic_msgs::DiagnosticStatus::OK, "SMC status OK" );
 
+		static unsigned int old_disconnects = 0;
 		int r;
 
 		// Firmware Version
@@ -622,7 +624,10 @@ namespace pololu_smc_driver
 		{
 			stat.summary( diagnostic_msgs::DiagnosticStatus::WARN, "Failed to fetch fw_version" );
 			if( r == SMC_ERROR_NO_DEVICE )
+			{
 				SMCClose( );
+				disconnects++;
+			}
 		}
 		else
 		{
@@ -639,7 +644,10 @@ namespace pololu_smc_driver
 		{
 			stat.summary( diagnostic_msgs::DiagnosticStatus::WARN, "Failed to fetch SMC variables" );
 			if( r == SMC_ERROR_NO_DEVICE )
+			{
 				SMCClose( );
+				disconnects++;
+			}
 		}
 		else
 		{
@@ -649,6 +657,11 @@ namespace pololu_smc_driver
 				stat.summary( diagnostic_msgs::DiagnosticStatus::WARN, "SMC has recorded errors" );
 			else if( vars.limitStatus )
 				stat.summary( diagnostic_msgs::DiagnosticStatus::WARN, "SMC is limiting speed" );
+			else if( disconnects != old_disconnects )
+			{
+				stat.summary( diagnostic_msgs::DiagnosticStatus::WARN, "SMC has experienced disconnect(s)" );
+				old_disconnects = disconnects;
+			}
 			stat.add( "errorStatus", ErrorToStr( vars.errorStatus ) );
 			stat.add( "errorOccurred", ErrorToStr( vars.errorOccurred ) );
 			stat.add( "limitStatus", LimitToStr( vars.limitStatus ) );
@@ -660,6 +673,7 @@ namespace pololu_smc_driver
 			stat.add( "rcPeriod", vars.rcPeriod / 1000.0 );
 			stat.add( "baudRate", vars.baudRateRegister );
 			stat.add( "time", vars.timeMs / 1000.0 );
+			stat.add( "disconnects", disconnects );
 		}
 	}
 
