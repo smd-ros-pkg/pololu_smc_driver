@@ -97,6 +97,12 @@ namespace pololu_smc_driver
 		SMCClose( );
 		smc_exit( );
 		delete dyn_re;
+		delete rc1_dyn_re;
+		delete rc2_dyn_re;
+		delete analog1_dyn_re;
+		delete analog2_dyn_re;
+		delete fwlimits_dyn_re;
+		delete revlimits_dyn_re;
 	}
 
 	bool SMCDriver::set_speed( short int spd )
